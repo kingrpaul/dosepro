@@ -107,47 +107,53 @@ class Color():
     def next(self):
         self.current = next(self.from_palette)
 
+class Menu(tk.Frame):
+    def __init__(self, master):
+        menu = tk.Menu(root)
+        root.config(menu=menu)
 
-def populate(self, menu):
-    """ """
+        filemenu = tk.Menu(menu)
+        menu.add_cascade(label="File", menu=filemenu)
+        submenu = tk.Menu(filemenu)
+        submenu.add_command(label="Profiler", command=master.menu_file_import_profiler)
+        submenu.add_command(label="Film", command=master.menu_file_import_film)
+        submenu.add_command(label="Pulse", command=master.menu_import_pulse)
+        filemenu.add_cascade(label='Import from ...', menu=submenu, underline=0)
+        filemenu.add_separator()
+        filemenu.add_command(label="Exit", command=root.quit)
 
-    filemenu = tk.Menu(menu)
-    menu.add_cascade(label="File", menu=filemenu)
-    submenu = tk.Menu(filemenu)
-    submenu.add_command(label="Profiler", command=self.menu_file_import_profiler)
-    submenu.add_command(label="Film", command=self.menu_file_import_film)
-    submenu.add_command(label="Pulse", command=self.menu_import_pulse)
-    filemenu.add_cascade(label='Import from ...', menu=submenu, underline=0)
-    filemenu.add_separator()
-    filemenu.add_command(label="Exit", command=root.quit)
+        editmenu = tk.Menu(menu)
+        menu.add_cascade(label="Edit", menu=editmenu)
+        editmenu.add_command(label="Norm Dose", command=self.menu_stub)
+        editmenu.add_command(label="Norm X", command=self.menu_stub)
+        editmenu.add_command(label="Resample", command=self.menu_stub)
+        editmenu.add_command(label="Resample Y", command=self.menu_stub)
+        editmenu.add_command(label="Flip", command=self.menu_stub)
+        editmenu.add_command(label="Normalise", command=self.menu_stub)
+        editmenu.add_command(label="2X/W", command=self.menu_stub)
+        editmenu.add_command(label="Symmetrise", command=self.menu_stub)
 
-    editmenu = tk.Menu(menu)
-    menu.add_cascade(label="Edit", menu=editmenu)
-    editmenu.add_command(label="Norm Dose", command=self.menu_stub)
-    editmenu.add_command(label="Norm X", command=self.menu_stub)
-    editmenu.add_command(label="Resample", command=self.menu_stub)
-    editmenu.add_command(label="Resample Y", command=self.menu_stub)
-    editmenu.add_command(label="Flip", command=self.menu_stub)
-    editmenu.add_command(label="Normalise", command=self.menu_stub)
-    editmenu.add_command(label="2X/W", command=self.menu_stub)
-    editmenu.add_command(label="Symmetrise", command=self.menu_stub)
+        getmenu = tk.Menu(menu)
+        menu.add_cascade(label="Get", menu=getmenu)
+        getmenu.add_command(label="Edges", command=self.menu_stub)
+        getmenu.add_command(label="Flatness", command=self.menu_stub)
+        getmenu.add_command(label="Symmetry", command=self.menu_stub)
+        getmenu.add_command(label="X", command=self.menu_stub)
+        getmenu.add_command(label="Y", command=self.menu_stub)
+        getmenu.add_command(label="Segment", command=self.menu_stub)
+        getmenu.add_command(label="Shoulders", command=self.menu_stub)
+        getmenu.add_command(label="Tails", command=self.menu_stub)
+        getmenu.add_command(label="Umbra", command=self.menu_stub)
 
-    getmenu = tk.Menu(menu)
-    menu.add_cascade(label="Get", menu=getmenu)
-    getmenu.add_command(label="Edges", command=self.menu_stub)
-    getmenu.add_command(label="Flatness", command=self.menu_stub)
-    getmenu.add_command(label="Symmetry", command=self.menu_stub)
-    getmenu.add_command(label="X", command=self.menu_stub)
-    getmenu.add_command(label="Y", command=self.menu_stub)
-    getmenu.add_command(label="Segment", command=self.menu_stub)
-    getmenu.add_command(label="Shoulders", command=self.menu_stub)
-    getmenu.add_command(label="Tails", command=self.menu_stub)
-    getmenu.add_command(label="Umbra", command=self.menu_stub)
+        helpmenu = tk.Menu(menu)
+        menu.add_cascade(label="Help", menu=helpmenu)
+        helpmenu.add_command(label="About...", command=master.about)
 
-    helpmenu = tk.Menu(menu)
-    menu.add_cascade(label="Help", menu=helpmenu)
-    helpmenu.add_command(label="About...", command=self.about)
-    return menu
+    def menu_stub(self):
+        pass
+
+
+
 
 class Application(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -174,13 +180,8 @@ class Application(tk.Frame):
 
         self.status = StatusBar(self).pack(fill=tk.X)
         self.color = Color()
+        self.menu = Menu(self)
 
-        menu = tk.Menu(root)
-        root.config(menu=menu)
-        menu = populate(self, menu)
-
-    def menu_stub(self):
-        pass
 
     def menu_file_import_film(self):
         filename = askopenfilename(
