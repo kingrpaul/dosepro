@@ -60,6 +60,28 @@ class StatusBar(tk.Frame):
         self.status.set("")
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.file_import_profiler, expand=1)
 
+# class ButtonBar(tk.Frame):
+#     def __init__(self, master):
+#         tk.Frame.__init__(self, master)
+#         self.buttons = []
+
+#     def add(self):
+#         button = tk.Button(master=self.button_bar,
+#                                 bg=self.next_color,
+#                                 text="  ",
+#                                 command=self._quit)
+#         self.buttons.append(button)
+#         self.button.pack(side=tk.LEFT, fill='both')
+
+
+def add_buttom(self):
+    self.button = tk.Button(master=self.button_bar,
+                            bg=self.next_color,
+                            text="  ",
+                            command=self._quit)
+    self.button.pack(side=tk.LEFT, fill='both')
+
+
 class Directory(str):
     def __init__():
         pass
@@ -84,6 +106,48 @@ class Color():
         return self.current
     def next(self):
         self.current = next(self.from_palette)
+
+
+def populate(self, menu):
+    """ """
+
+    filemenu = tk.Menu(menu)
+    menu.add_cascade(label="File", menu=filemenu)
+    submenu = tk.Menu(filemenu)
+    submenu.add_command(label="Profiler", command=self.menu_file_import_profiler)
+    submenu.add_command(label="Film", command=self.menu_file_import_film)
+    submenu.add_command(label="Pulse", command=self.menu_import_pulse)
+    filemenu.add_cascade(label='Import from ...', menu=submenu, underline=0)
+    filemenu.add_separator()
+    filemenu.add_command(label="Exit", command=root.quit)
+
+    editmenu = tk.Menu(menu)
+    menu.add_cascade(label="Edit", menu=editmenu)
+    editmenu.add_command(label="Norm Dose", command=self.menu_stub)
+    editmenu.add_command(label="Norm X", command=self.menu_stub)
+    editmenu.add_command(label="Resample", command=self.menu_stub)
+    editmenu.add_command(label="Resample Y", command=self.menu_stub)
+    editmenu.add_command(label="Flip", command=self.menu_stub)
+    editmenu.add_command(label="Normalise", command=self.menu_stub)
+    editmenu.add_command(label="2X/W", command=self.menu_stub)
+    editmenu.add_command(label="Symmetrise", command=self.menu_stub)
+
+    getmenu = tk.Menu(menu)
+    menu.add_cascade(label="Get", menu=getmenu)
+    getmenu.add_command(label="Edges", command=self.menu_stub)
+    getmenu.add_command(label="Flatness", command=self.menu_stub)
+    getmenu.add_command(label="Symmetry", command=self.menu_stub)
+    getmenu.add_command(label="X", command=self.menu_stub)
+    getmenu.add_command(label="Y", command=self.menu_stub)
+    getmenu.add_command(label="Segment", command=self.menu_stub)
+    getmenu.add_command(label="Shoulders", command=self.menu_stub)
+    getmenu.add_command(label="Tails", command=self.menu_stub)
+    getmenu.add_command(label="Umbra", command=self.menu_stub)
+
+    helpmenu = tk.Menu(menu)
+    menu.add_cascade(label="Help", menu=helpmenu)
+    helpmenu.add_command(label="About...", command=self.about)
+    return menu
 
 class Application(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -113,7 +177,7 @@ class Application(tk.Frame):
 
         menu = tk.Menu(root)
         root.config(menu=menu)
-        menu = self.populate(menu)
+        menu = populate(self, menu)
 
     def menu_stub(self):
         pass
@@ -191,7 +255,6 @@ class Application(tk.Frame):
         def OK():
             self.color.next()
             self.next_color = self.color.get()
-            # self.next_color = next(self.from_palette)
             profile = Profile().from_pulse(centre.get(), width.get(),
                                            (start.get(), end.get()), increment.get())
             self.subplot.plot(profile.x, profile.y, color=self.next_color)
@@ -203,56 +266,6 @@ class Application(tk.Frame):
         ok_button.grid(column=0, row=6, columnspan=2)
 
         pulse_window.mainloop()
-
-
-    def add_buttom(self):
-        self.button = tk.Button(master=self.button_bar,
-                                bg=self.next_color,
-                                text="  ",
-                                command=self._quit)
-        self.button.pack(side=tk.LEFT, fill='both')
-
-
-    def populate(self, menu):
-        """ """
-
-        filemenu = tk.Menu(menu)
-        menu.add_cascade(label="File", menu=filemenu)
-        submenu = tk.Menu(filemenu)
-        submenu.add_command(label="PRS", command=self.menu_file_import_profiler)
-        submenu.add_command(label="PNG", command=self.menu_file_import_film)
-        submenu.add_command(label="Pulse", command=self.menu_import_pulse)
-        filemenu.add_cascade(label='Import from ...', menu=submenu, underline=0)
-        filemenu.add_separator()
-        filemenu.add_command(label="Exit", command=root.quit)
-
-        editmenu = tk.Menu(menu)
-        menu.add_cascade(label="Edit", menu=editmenu)
-        editmenu.add_command(label="Norm Dose", command=self.menu_stub)
-        editmenu.add_command(label="Norm X", command=self.menu_stub)
-        editmenu.add_command(label="Resample", command=self.menu_stub)
-        editmenu.add_command(label="Resample Y", command=self.menu_stub)
-        editmenu.add_command(label="Flip", command=self.menu_stub)
-        editmenu.add_command(label="Normalise", command=self.menu_stub)
-        editmenu.add_command(label="2X/W", command=self.menu_stub)
-        editmenu.add_command(label="Symmetrise", command=self.menu_stub)
-
-        getmenu = tk.Menu(menu)
-        menu.add_cascade(label="Get", menu=getmenu)
-        getmenu.add_command(label="Edges", command=self.menu_stub)
-        getmenu.add_command(label="Flatness", command=self.menu_stub)
-        getmenu.add_command(label="Symmetry", command=self.menu_stub)
-        getmenu.add_command(label="X", command=self.menu_stub)
-        getmenu.add_command(label="Y", command=self.menu_stub)
-        getmenu.add_command(label="Segment", command=self.menu_stub)
-        getmenu.add_command(label="Shoulders", command=self.menu_stub)
-        getmenu.add_command(label="Tails", command=self.menu_stub)
-        getmenu.add_command(label="Umbra", command=self.menu_stub)
-
-        helpmenu = tk.Menu(menu)
-        menu.add_cascade(label="Help", menu=helpmenu)
-        helpmenu.add_command(label="About...", command=self.about)
-        return menu
 
     def on_key_press(self, event):
         print("you pressed {}".format(event.key))
