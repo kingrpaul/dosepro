@@ -43,6 +43,24 @@ else:
     from pymedphys._labs.paulking.profile import Profile
 
 
+class StatusBar(tk.Frame):   
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        self.status = tk.StringVar()        
+        self.label=tk.Label(self, bd=1, relief=tk.SUNKEN, anchor=tk.W,
+                           textvariable=self.status,
+                           font=('arial',10,'normal'))
+        self.label.pack(fill=tk.X)        
+        self.pack()
+        self.status.set('StatusBar Ready')
+    def set(self, msg, *args):
+        self.status.set(msg % args)
+        self.update_idletasks()
+    def clear(self):
+        self.status.set("")
+        self.update_idletasks()
+
+
 class Application(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
@@ -66,9 +84,7 @@ class Application(tk.Frame):
         self.button_bar.pack(side=tk.BOTTOM, fill="both", expand=True)
         self.button = None
 
-        self.status = tk.Label(self, bd=1, relief=tk.SUNKEN, anchor=tk.W)
-        self.status.pack(fill=tk.X)
-        self.status_set('Ready.')
+        self.status = StatusBar(self).pack(fill=tk.X)
 
         self.from_palette = (
             c for c in ['red', 'green', 'orange', 'blue', 'yellow', 'purple1',
@@ -87,14 +103,6 @@ class Application(tk.Frame):
                                 text="  ",
                                 command=self._quit)
         self.button.pack(side=tk.LEFT, fill='both')
-
-    def status_set(self, msg, *args):
-        self.status.config(text=msg % args)
-        self.status.update_idletasks()
-
-    def status_clear(self):
-        self.status.config(text="")
-        self.status.update_idletasks()
 
     def populate(self, menu):
         """ """
@@ -223,7 +231,7 @@ class Application(tk.Frame):
             self.canvas.draw()
             pulse_window.destroy()
             self.add_buttom()
-            self.status_set('Pulse created.')
+            self.status.set('Pulse created.')
         ok_button = tk.Button(pulse_window, text="OK", command=OK)
         ok_button.grid(column=0, row=6, columnspan=2)
 
