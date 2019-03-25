@@ -95,6 +95,8 @@ class Menu(tk.Frame):
             ## =====
             filemenu.add_command(label="Clear Selected", command=master.menu_file_clear_selected)
             ## =====
+            filemenu.add_command(label="Clear All", command=master.menu_file_clear_all)
+            ## =====
             filemenu.add_command(label="Exit", command=root.quit)
         file_menu()
 
@@ -256,11 +258,12 @@ class Application(tk.Frame):
         pulse_window.mainloop()
 
     def menu_file_clear_selected(self):
-        print(len(self.profiles))
         self.profiles.pop(self.selected_profile.get())
-        print(len(self.profiles))
         self.update('menu_file_clear_selected')
         
+    def menu_file_clear_all(self):
+        self.profiles = []
+        self.update('menu_file_clear_all')
 
 
     def on_key_press(self, event):
