@@ -93,6 +93,8 @@ class Menu(tk.Frame):
             import_submenu.add_command(label="Pulse", command=master.menu_import_pulse)
             filemenu.add_cascade(label='Import ...', menu=import_submenu)
             ## =====
+            filemenu.add_command(label="Clear Selected", command=master.menu_file_clear_selected)
+            ## =====
             filemenu.add_command(label="Exit", command=root.quit)
         file_menu()
 
@@ -252,6 +254,14 @@ class Application(tk.Frame):
         ok_button = tk.Button(pulse_window, text="OK", command=OK)
         ok_button.grid(column=0, row=6, columnspan=2)
         pulse_window.mainloop()
+
+    def menu_file_clear_selected(self):
+        print(len(self.profiles))
+        self.profiles.pop(self.selected_profile.get())
+        print(len(self.profiles))
+        self.update('menu_file_clear_selected')
+        
+
 
     def on_key_press(self, event):
         print("you pressed {}".format(event.key))
