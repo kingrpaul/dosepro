@@ -105,7 +105,7 @@ class Menu(tk.Frame):
             menu.add_cascade(label="Edit", menu=editmenu)
             ## =====
             resample_submenu = tk.Menu(editmenu)  
-            resample_submenu.add_command(label="X", command=self.menu_stub)
+            resample_submenu.add_command(label="X", command=master.menu_resample_x)
             resample_submenu.add_command(label="Y", command=self.menu_stub)
             editmenu.add_cascade(label='Resample ...', menu=resample_submenu)
             ## =====    
@@ -264,6 +264,32 @@ class Application(tk.Frame):
     def menu_file_clear_all(self):
         self.profiles = []
         self.update('menu_file_clear_all')
+
+    def menu_resample_x(self):
+        step_window = tk.Tk()
+        step_window.title("Step Size")
+        step_window.grid()
+        step = tk.DoubleVar(value=0.1)
+        label = tk.Label(step_window, width=10, text="Step size")
+        entry = tk.Entry(step_window, width=10, textvariable=step)
+        entry.insert(tk.END, 0.1)
+        label.grid(column=0, row=0, sticky=tk.E)
+        entry.grid(column=1, row=0)
+        def OK():
+            print(step.get())
+            ###
+            self.update('menu_import_pulse')
+            step_window.destroy()
+        ok_button = tk.Button(step_window, text="OK", command=OK)
+        ok_button.grid(column=0, row=1, columnspan=2)
+        step_window.mainloop()
+
+        step = 0.01
+        new_profile = self.profiles[self.selected_profile.get()].resample_x(step)
+        print(new_profile)
+
+        ########################
+        ########################
 
 
     def on_key_press(self, event):
