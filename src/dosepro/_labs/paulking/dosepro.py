@@ -52,14 +52,99 @@ class StatusBar(tk.Frame):
                            font=('arial',10,'normal'))
         self.label.pack(fill=tk.X)        
         self.pack()
-        self.status.set('StatusBar Ready')
     def set(self, msg, *args):
-        self.status.set(msg % args)
+        self.status.set(msg)
         self.update_idletasks()
     def clear(self):
         self.status.set("")
         self.update_idletasks()
 
+class Directory(str):
+    def __init__():
+        pass
+
+class Color():
+    def __init__(self):
+        self.palette = ['red', 'green', 'orange', 'blue', 'yellow', 'purple1', 'black'
+                        'red', 'green', 'orange', 'blue', 'yellow', 'purple1', 'black']
+        self.from_palette = (c for c in self.palette)
+        self.current = next(self.from_palette)
+    def get(self):
+        return self.current
+    def next(self):
+        self.current = next(self.from_palette)
+    def reset(self):
+        self.__init__()
+
+class Menu(tk.Frame):
+    def __init__(self, master):
+        menu = tk.Menu(root)
+        root.config(menu=menu)
+
+        def file_menu():
+            filemenu = tk.Menu(menu)
+            menu.add_cascade(label="File", menu=filemenu)
+            ## =====
+            import_submenu = tk.Menu(filemenu)  ## =====
+            import_submenu.add_command(label="Profiler", command=master.menu_file_import_profiler)
+            import_submenu.add_command(label="Film", command=master.menu_file_import_film)
+            import_submenu.add_command(label="Pulse", command=master.menu_import_pulse)
+            filemenu.add_cascade(label='Import ...', menu=import_submenu)
+            ## =====
+            filemenu.add_command(label="Exit", command=root.quit)
+        file_menu()
+
+        def edit_menu():
+            editmenu = tk.Menu(menu)
+            menu.add_cascade(label="Edit", menu=editmenu)
+            ## =====
+            resample_submenu = tk.Menu(editmenu)  
+            resample_submenu.add_command(label="X", command=self.menu_stub)
+            resample_submenu.add_command(label="Y", command=self.menu_stub)
+            editmenu.add_cascade(label='Resample ...', menu=resample_submenu)
+            ## =====    
+            normalise_submenu = tk.Menu(editmenu)
+            normalise_submenu.add_command(label="X", command=self.menu_stub)
+            normalise_submenu.add_command(label="Y", command=self.menu_stub)
+            editmenu.add_cascade(label='Normalise ...', menu=normalise_submenu)
+            ## =====
+            editmenu.add_command(label="Flip", command=self.menu_stub)
+            ## =====
+            editmenu.add_command(label="Symmetrise", command=self.menu_stub)
+        edit_menu()
+
+        def get_menu():
+            getmenu = tk.Menu(menu)
+            menu.add_cascade(label="Get", menu=getmenu)
+            ## =====    
+            value_submenu = tk.Menu(getmenu)
+            value_submenu.add_command(label="X", command=self.menu_stub)
+            value_submenu.add_command(label="Y", command=self.menu_stub)
+            getmenu.add_cascade(label='Value ...', menu=value_submenu)
+            ## =====
+            getmenu.add_command(label="Edges", command=self.menu_stub)
+            ## =====
+            getmenu.add_command(label="Flatness", command=self.menu_stub)
+            ## =====
+            getmenu.add_command(label="Symmetry", command=self.menu_stub)
+            # ## =====
+            segment_submenu = tk.Menu(getmenu)
+            segment_submenu.add_command(label="Defined", command=self.menu_stub)
+            segment_submenu.add_command(label="Umbra", command=self.menu_stub)
+            segment_submenu.add_command(label="Penumbra", command=self.menu_stub)
+            segment_submenu.add_command(label="Shoulders", command=self.menu_stub)
+            segment_submenu.add_command(label="Tails", command=self.menu_stub)
+            getmenu.add_cascade(label='Segment ...', menu=segment_submenu)
+        get_menu()
+
+        def help_menu():
+            helpmenu = tk.Menu(menu)
+            menu.add_cascade(label="Help", menu=helpmenu)
+            helpmenu.add_command(label="About...", command=master.about)
+        help_menu()
+
+    def menu_stub(self):
+        pass
 
 class Application(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -67,7 +152,7 @@ class Application(tk.Frame):
         self.parent = parent
         root.wm_title("Profile Tool")
 
-        fig = Figure(figsize=(5, 4), dpi=100)
+        fig = Figure(figsize=(6, 5), dpi=100)
         self.subplot = fig.add_subplot(111)
 
         self.canvas = FigureCanvasTkAgg(fig, master=root)
@@ -79,71 +164,71 @@ class Application(tk.Frame):
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         self.canvas.mpl_connect("key_press_event", self.on_key_press)
 
+        self.status = StatusBar(self)
+        self.status.pack(fill=tk.X)
+        self.color = Color()
+        self.menu = Menu(self)
+
+        self.profiles = []
         self.buttons = []
         self.button_bar = tk.Frame(self)
         self.button_bar.pack(side=tk.BOTTOM, fill="both", expand=True)
-        self.button = None
 
-        self.status = StatusBar(self).pack(fill=tk.X)
+    def update(self, msg):
+        self.color.reset()
+        self.subplot.cla()
+        self.buttons = []
+        for button in self.button_bar.winfo_children():
+            button.destroy()
+        for i,profile in enumerate(self.profiles):
+            self.subplot.plot(profile.x, profile.y, color=self.color.get())
+            
+            button = tk.Button(master=self.button_bar,
+                        bg=self.color.get(), text=str(i),
+                        command=self._quit)
+            button.pack(side=tk.LEFT, fill='both')
+            self.buttons.append(button)
+            self.color.next()
+        self.status.set(msg)
+        self.canvas.draw()
 
-        self.from_palette = (
-            c for c in ['red', 'green', 'orange', 'blue', 'yellow', 'purple1',
-                        'red', 'green', 'orange', 'blue', 'yellow', 'purple1'])
-        self.next_color = None
+    def menu_file_import_film(self):
+        filename = askopenfilename(
+            initialdir="/", title="Film File",
+            filetypes=(("Film Files", "*.png"), ("all files", "*.*")))
+        self.profiles.append(Profile().from_narrow_png(filename))
+        self.update('menu_file_import_film')
 
-    # BUTTON CALLBACK TO SELECT A CURRENT CURVE FOR EDITING
+    def menu_file_import_profiler(self):
+        filename = askopenfilename(
+            initialdir="/", title="SNC Profiler",
+            filetypes=(("Profiler Files", "*.prs"), ("all files", "*.*")))
+        self.profiles.append(Profile().from_snc_profiler(filename, 'rad'))
+        self.profiles.append(Profile().from_snc_profiler(filename, 'tvs'))
+        self.update('menu_file_import_profiler')
 
-        menu = tk.Menu(root)
-        root.config(menu=menu)
-        menu = self.populate(menu)
-
-    def add_buttom(self):
-        self.button = tk.Button(master=self.button_bar,
-                                bg=self.next_color,
-                                text="  ",
-                                command=self._quit)
-        self.button.pack(side=tk.LEFT, fill='both')
-
-    def populate(self, menu):
-        """ """
-
-        filemenu = tk.Menu(menu)
-        menu.add_cascade(label="File", menu=filemenu)
-        submenu = tk.Menu(filemenu)
-        submenu.add_command(label="PRS", command=self.profiler_file)
-        submenu.add_command(label="PNG", command=self.film_file)
-        submenu.add_command(label="Pulse", command=self.create_pulse)
-        filemenu.add_cascade(label='Import from ...', menu=submenu, underline=0)
-        filemenu.add_separator()
-        filemenu.add_command(label="Exit", command=root.quit)
-
-        editmenu = tk.Menu(menu)
-        menu.add_cascade(label="Edit", menu=editmenu)
-        editmenu.add_command(label="Norm Dose", command=self.profiler_file)
-        editmenu.add_command(label="Norm X", command=self.film_file)
-        editmenu.add_command(label="Resample", command=self.stub)
-        editmenu.add_command(label="Resample Y", command=self.stub)
-        editmenu.add_command(label="Flip", command=self.stub)
-        editmenu.add_command(label="Normalise", command=self.stub)
-        editmenu.add_command(label="2X/W", command=self.stub)
-        editmenu.add_command(label="Symmetrise", command=self.stub)
-
-        getmenu = tk.Menu(menu)
-        menu.add_cascade(label="Get", menu=getmenu)
-        getmenu.add_command(label="Edges", command=self.stub)
-        getmenu.add_command(label="Flatness", command=self.stub)
-        getmenu.add_command(label="Symmetry", command=self.stub)
-        getmenu.add_command(label="X", command=self.stub)
-        getmenu.add_command(label="Y", command=self.stub)
-        getmenu.add_command(label="Segment", command=self.stub)
-        getmenu.add_command(label="Shoulders", command=self.stub)
-        getmenu.add_command(label="Tails", command=self.stub)
-        getmenu.add_command(label="Umbra", command=self.stub)
-
-        helpmenu = tk.Menu(menu)
-        menu.add_cascade(label="Help", menu=helpmenu)
-        helpmenu.add_command(label="About...", command=self.about)
-        return menu
+    def menu_import_pulse(self):
+        pulse_window = tk.Tk()
+        pulse_window.title("Pulse Parameters")
+        pulse_window.grid()
+        variables = []
+        params = [('Centre',0.0), ('Width',10.0), ('Start',-12.0), ('End',12.0), ('Step',0.1)]
+        for i,(l,d) in enumerate(params):
+            variable = tk.DoubleVar(pulse_window, value=d)
+            variables.append(variable)
+            label = tk.Label(pulse_window, text=l)
+            entry = tk.Entry(pulse_window, width=10, textvariable=variable)
+            label.grid(column=0, row=i, sticky=tk.E)
+            entry.grid(column=1, row=i)
+        def OK():
+            p = [v.get() for v in variables]
+            p = [p[0], p[1], (p[2], p[3]), p[4]]
+            self.profiles.append(Profile().from_pulse(*p))
+            self.update('menu_import_pulse')
+            pulse_window.destroy()
+        ok_button = tk.Button(pulse_window, text="OK", command=OK)
+        ok_button.grid(column=0, row=6, columnspan=2)
+        pulse_window.mainloop()
 
     def on_key_press(self, event):
         print("you pressed {}".format(event.key))
@@ -152,90 +237,6 @@ class Application(tk.Frame):
     def _quit(self):
         root.quit()
         root.destroy()
-
-    def stub(self):
-        pass
-
-    def profiler_file(self):
-        filename = askopenfilename(
-            initialdir="/", title="SNC Profiler",
-            filetypes=(("Profiler Files", "*.prs"), ("all files", "*.*")))
-
-        profiler = Profile().from_snc_profiler(filename, 'rad')
-        self.subplot.plot(profiler.x, profiler.y)
-        self.canvas.draw()
-        self.next_color = next(self.from_palette)
-        self.add_buttom()
-
-        profiler = Profile().from_snc_profiler(filename, 'tvs')
-        self.subplot.plot(profiler.x, profiler.y, color=self.next_color)
-        self.canvas.draw()
-        self.next_color = next(self.from_palette)
-        self.add_buttom()
-
-        self.canvas.draw()
-
-    def film_file(self):
-        filename = askopenfilename(
-            initialdir="/", title="Film File",
-            filetypes=(("Film Files", "*.png"), ("all files", "*.*")))
-        profiler = Profile().from_narrow_png(filename)
-        self.subplot.plot(profiler.x, profiler.y)
-        self.canvas.draw()
-
-    def create_pulse(self):
-
-        pulse_window = tk.Tk()
-        pulse_window.title("Parameters")
-        pulse_window.grid()
-        heading = tk.Label(pulse_window, text='Pulse Parameters')
-        heading.grid(row=0, column=0, columnspan=2)
-        # centre
-        label = tk.Label(pulse_window, text="   Centre:", anchor=tk.E)
-        label.grid(column=0, row=1)
-        centre = tk.DoubleVar(pulse_window, value=0.0)
-        centre_entry = tk.Entry(pulse_window, width=10, textvariable=centre)
-        centre_entry.grid(column=1, row=1)
-        # width
-        label = tk.Label(pulse_window, text="    Width:")
-        label.grid(column=0, row=2)
-        width = tk.DoubleVar(pulse_window, value=10.0)
-        width_entry = tk.Entry(pulse_window, width=10, textvariable=width)
-        width_entry.grid(column=1, row=2)
-        # domain, start
-        label = tk.Label(pulse_window, text="    Start:")
-        label.grid(column=0, row=3)
-        start = tk.DoubleVar(pulse_window, value=-10.0)
-        start_entry = tk.Entry(pulse_window, width=10, textvariable=start)
-        start_entry.grid(column=1, row=3)
-        # domain, end
-        label = tk.Label(pulse_window, text="      End:")
-        label.grid(column=0, row=4)
-        end = tk.DoubleVar(pulse_window, value=10.0)
-        end_entry = tk.Entry(pulse_window, width=10, textvariable=end)
-        end_entry.grid(column=1, row=4)
-        # increment
-        label = tk.Label(pulse_window, text="Increment:")
-        label.grid(column=0, row=5)
-        increment = tk.DoubleVar(pulse_window, value=0.1)
-        increment_entry = tk.Entry(
-            pulse_window, width=10, textvariable=increment)
-        increment_entry.grid(column=1, row=5)
-        # OK Button
-
-        def OK():
-            self.next_color = next(self.from_palette)
-            profile = Profile().from_pulse(centre.get(), width.get(),
-                                           (start.get(), end.get()), increment.get())
-            self.subplot.plot(profile.x, profile.y, color=self.next_color)
-            self.canvas.draw()
-            pulse_window.destroy()
-            self.add_buttom()
-            self.status.set('Pulse created.')
-        ok_button = tk.Button(pulse_window, text="OK", command=OK)
-        ok_button.grid(column=0, row=6, columnspan=2)
-
-        pulse_window.mainloop()
 
     def about(self):
         tk.messagebox.showinfo(
