@@ -178,14 +178,13 @@ class Application(tk.Frame):
         self.color.reset()
         self.subplot.cla()
         self.buttons = []
-
         for button in self.button_bar.winfo_children():
             button.destroy()
-        for profile in self.profiles:
+        for i,profile in enumerate(self.profiles):
             self.subplot.plot(profile.x, profile.y, color=self.color.get())
             
             button = tk.Button(master=self.button_bar,
-                        bg=self.color.get(), text=" ",
+                        bg=self.color.get(), text=str(i),
                         command=self._quit)
             button.pack(side=tk.LEFT, fill='both')
             self.buttons.append(button)
@@ -230,59 +229,6 @@ class Application(tk.Frame):
         ok_button = tk.Button(pulse_window, text="OK", command=OK)
         ok_button.grid(column=0, row=6, columnspan=2)
         pulse_window.mainloop()
-
-
-    # def menu_import_pulse(self):
-    #     pulse_window = tk.Tk()
-    #     pulse_window.title("Parameters")
-    #     pulse_window.grid()
-    #     heading = tk.Label(pulse_window, text='Pulse Parameters')
-    #     heading.grid(row=0, column=0, columnspan=2)
-    #     # centre
-    #     label = tk.Label(pulse_window, text="   Centre:", anchor=tk.E)
-    #     label.grid(column=0, row=1)
-    #     centre = tk.DoubleVar(pulse_window, value=0.0)
-    #     centre_entry = tk.Entry(pulse_window, width=10, textvariable=centre)
-    #     centre_entry.grid(column=1, row=1)
-    #     # width
-    #     label = tk.Label(pulse_window, text="    Width:")
-    #     label.grid(column=0, row=2)
-    #     width = tk.DoubleVar(pulse_window, value=10.0)
-    #     width_entry = tk.Entry(pulse_window, width=10, textvariable=width)
-    #     width_entry.grid(column=1, row=2)
-    #     # domain, start
-    #     label = tk.Label(pulse_window, text="    Start:")
-    #     label.grid(column=0, row=3)
-    #     start = tk.DoubleVar(pulse_window, value=-10.0)
-    #     start_entry = tk.Entry(pulse_window, width=10, textvariable=start)
-    #     start_entry.grid(column=1, row=3)
-    #     # domain, end
-    #     label = tk.Label(pulse_window, text="      End:")
-    #     label.grid(column=0, row=4)
-    #     end = tk.DoubleVar(pulse_window, value=10.0)
-    #     end_entry = tk.Entry(pulse_window, width=10, textvariable=end)
-    #     end_entry.grid(column=1, row=4)
-    #     # increment
-    #     label = tk.Label(pulse_window, text="Increment:")
-    #     label.grid(column=0, row=5)
-    #     increment = tk.DoubleVar(pulse_window, value=0.1)
-    #     increment_entry = tk.Entry(
-    #         pulse_window, width=10, textvariable=increment)
-    #     increment_entry.grid(column=1, row=5)
-    #     # OK Button
-
-    #     def OK():
-    #         self.profiles.append(
-    #             Profile().from_pulse(
-    #                 centre.get(), width.get(),
-    #                 (start.get(), end.get()), 
-    #                 increment.get()))
-    #         self.update('menu_import_pulse')
-    #         pulse_window.destroy()
-    #     ok_button = tk.Button(pulse_window, text="OK", command=OK)
-    #     ok_button.grid(column=0, row=6, columnspan=2)
-
-    #     pulse_window.mainloop()
 
     def on_key_press(self, event):
         print("you pressed {}".format(event.key))
