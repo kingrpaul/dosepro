@@ -34,6 +34,8 @@ from matplotlib.backends.backend_tkagg import (
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 
+from functools import partial
+
 if "dosepro\dosepro" in __file__:
     add_path = os.path.abspath(os.path.join(__file__, '..','..','..','..'))
     add_path = os.path.join(add_path, 'src', 'dosepro', '_labs', 'paulking')
@@ -152,41 +154,61 @@ class Application(tk.Frame):
         self.parent = parent
         root.wm_title("Profile Tool")
 
+        selector_part = tk.Frame(self, width=5, height=100, background="bisque")
+        selector_part.pack(side=tk.LEFT)
+        graph_part = tk.Frame(self, width=90, height=100, background="blue")
+        graph_part.pack(side=tk.RIGHT)
+
         fig = Figure(figsize=(6, 5), dpi=100)
         self.subplot = fig.add_subplot(111)
 
-        self.canvas = FigureCanvasTkAgg(fig, master=root)
+        self.canvas = FigureCanvasTkAgg(fig, master=graph_part)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
-        self.toolbar = NavigationToolbar2Tk(self.canvas, root)
+
+        self.toolbar = NavigationToolbar2Tk(self.canvas, graph_part)
         self.toolbar.update()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         self.canvas.mpl_connect("key_press_event", self.on_key_press)
 
-        self.status = StatusBar(self)
+        self.status = StatusBar(graph_part)
         self.status.pack(fill=tk.X)
         self.color = Color()
         self.menu = Menu(self)
-
         self.profiles = []
+       
         self.buttons = []
-        self.button_bar = tk.Frame(self)
-        self.button_bar.pack(side=tk.BOTTOM, fill="both", expand=True)
+        self.selector = tk.Frame(selector_part)
+        self.selector.pack(side=tk.TOP, fill="both", expand=True)
+        self.selected_profile = tk.IntVar(value=0)
+        self.update('')
+
+        self.canvas.draw()
+
+    def set_active_profile(self, i):
+
+        for J in range(len(self.buttons)):
+            self.buttons[J].config(relief=tk.RAISED)    
+        self.selected_profile.set(i)
+        self.buttons[i].config(relief=tk.SUNKEN)
 
     def update(self, msg):
+        selected_profile = self.selected_profile.get()
         self.color.reset()
         self.subplot.cla()
         self.buttons = []
-        for button in self.button_bar.winfo_children():
+        for button in self.selector.winfo_children():
             button.destroy()
+        selector_title = tk.Label(master=self.selector, width=10, 
+                                  bg='white', text='Selector')
+        selector_title.pack(side="top", fill="both", expand=True)
         for i,profile in enumerate(self.profiles):
             self.subplot.plot(profile.x, profile.y, color=self.color.get())
-            
-            button = tk.Button(master=self.button_bar,
-                        bg=self.color.get(), text=str(i),
-                        command=self._quit)
-            button.pack(side=tk.LEFT, fill='both')
+            button = tk.Button(master=self.selector,
+                        bg=self.color.get(), text=str(i), width=10,
+                        command=partial(self.set_active_profile, i))
+            button.pack(side=tk.TOP, fill='both')
             self.buttons.append(button)
             self.color.next()
         self.status.set(msg)
@@ -224,6 +246,7 @@ class Application(tk.Frame):
             p = [v.get() for v in variables]
             p = [p[0], p[1], (p[2], p[3]), p[4]]
             self.profiles.append(Profile().from_pulse(*p))
+            self.selected_profile.set(len(self.profiles)-1)
             self.update('menu_import_pulse')
             pulse_window.destroy()
         ok_button = tk.Button(pulse_window, text="OK", command=OK)
