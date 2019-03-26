@@ -44,23 +44,6 @@ if "dosepro\dosepro" in __file__:
 else:
     from pymedphys._labs.paulking.profile import Profile
 
-
-class StatusBar(tk.Frame):   
-    def __init__(self, master):
-        tk.Frame.__init__(self, master)
-        self.status = tk.StringVar()        
-        self.label=tk.Label(self, bd=1, relief=tk.SUNKEN, anchor=tk.W,
-                           textvariable=self.status,
-                           font=('arial',10,'normal'))
-        self.label.pack(fill=tk.X)        
-        self.pack()
-    def set(self, msg, *args):
-        self.status.set(msg)
-        self.update_idletasks()
-    def clear(self):
-        self.status.set("")
-        self.update_idletasks()
-
 class Color():
     def __init__(self):
         self.palette = ['red', 'green', 'orange', 'blue', 'yellow', 'purple1', 'black'
@@ -155,36 +138,43 @@ class Application(tk.Frame):
         root.wm_title("Profile Tool")
 
         selector_frame = tk.Frame(self, width=5, height=100, background="bisque")
-        graph_frame = tk.Frame(self, width=90, height=100, background="blue")
+        graph_frame = tk.Frame(self, width=90, height=100, background="bisque")
         selector_frame.pack(side=tk.LEFT)
         graph_frame.pack(side=tk.RIGHT)
 
         fig = Figure(figsize=(6, 5), dpi=100)
-        self.subplot = fig.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(fig, master=graph_frame)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-
-
+        self.subplot = fig.add_subplot(111)
         self.toolbar = NavigationToolbar2Tk(self.canvas, graph_frame)
         self.toolbar.update()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         self.canvas.mpl_connect("key_press_event", self.on_key_press)
 
-        self.status = StatusBar(graph_frame)
-        self.status.pack(fill=tk.X)
+        ## self.status
+        self.status = tk.StringVar() 
+        self.status_bar = tk.Frame(master=graph_frame, relief=tk.RIDGE)
+        self.status_label=tk.Label(self.status_bar, bd=1, relief=tk.FLAT, anchor=tk.W, 
+                                   textvariable=self.status, 
+                                   font=('arial',10,'normal'))
+        self.status_label.pack(fill=tk.X, expand=True, side=tk.LEFT) 
+        self.status_bar.pack(fill=tk.X, expand=False, side=tk.LEFT)
+        self.status.set("__init__")
+
         self.color = Color()
         self.menu = Menu(self)
+
         self.profiles = []
 
         self.data_folder = os.path.join(str.split(__file__, 'src')[0], 
                            'tests','test_labs', 'test_paulking', 'data')
+
         self.buttons = []
         self.selector = tk.Frame(selector_frame)
         self.selector.pack(side=tk.TOP, fill="both", expand=True)
         self.selected_profile = tk.IntVar(value=0)
-        self.update('')
-
+        self.update('__init__')
         self.canvas.draw()
 
     def set_active_profile(self, i):
