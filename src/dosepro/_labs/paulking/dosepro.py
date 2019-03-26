@@ -61,10 +61,6 @@ class StatusBar(tk.Frame):
         self.status.set("")
         self.update_idletasks()
 
-class Directory(str):
-    def __init__():
-        pass
-
 class Color():
     def __init__(self):
         self.palette = ['red', 'green', 'orange', 'blue', 'yellow', 'purple1', 'black'
@@ -97,7 +93,7 @@ class Menu(tk.Frame):
             ## =====
             filemenu.add_command(label="Clear All", command=master.menu_file_clear_all)
             ## =====
-            filemenu.add_command(label="Exit", command=root.quit)
+            filemenu.add_command(label="Exit", command=master._quit)
         file_menu()
 
         def edit_menu():
@@ -158,32 +154,33 @@ class Application(tk.Frame):
         self.parent = parent
         root.wm_title("Profile Tool")
 
-        selector_part = tk.Frame(self, width=5, height=100, background="bisque")
-        selector_part.pack(side=tk.LEFT)
-        graph_part = tk.Frame(self, width=90, height=100, background="blue")
-        graph_part.pack(side=tk.RIGHT)
+        selector_frame = tk.Frame(self, width=5, height=100, background="bisque")
+        graph_frame = tk.Frame(self, width=90, height=100, background="blue")
+        selector_frame.pack(side=tk.LEFT)
+        graph_frame.pack(side=tk.RIGHT)
 
         fig = Figure(figsize=(6, 5), dpi=100)
         self.subplot = fig.add_subplot(111)
-
-        self.canvas = FigureCanvasTkAgg(fig, master=graph_part)
+        self.canvas = FigureCanvasTkAgg(fig, master=graph_frame)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
 
-        self.toolbar = NavigationToolbar2Tk(self.canvas, graph_part)
+        self.toolbar = NavigationToolbar2Tk(self.canvas, graph_frame)
         self.toolbar.update()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         self.canvas.mpl_connect("key_press_event", self.on_key_press)
 
-        self.status = StatusBar(graph_part)
+        self.status = StatusBar(graph_frame)
         self.status.pack(fill=tk.X)
         self.color = Color()
         self.menu = Menu(self)
         self.profiles = []
-       
+
+        self.data_folder = os.path.join(str.split(__file__, 'src')[0], 
+                           'tests','test_labs', 'test_paulking', 'data')
         self.buttons = []
-        self.selector = tk.Frame(selector_part)
+        self.selector = tk.Frame(selector_frame)
         self.selector.pack(side=tk.TOP, fill="both", expand=True)
         self.selected_profile = tk.IntVar(value=0)
         self.update('')
@@ -191,7 +188,6 @@ class Application(tk.Frame):
         self.canvas.draw()
 
     def set_active_profile(self, i):
-
         for J in range(len(self.buttons)):
             self.buttons[J].config(relief=tk.RAISED)    
         self.selected_profile.set(i)
@@ -220,14 +216,14 @@ class Application(tk.Frame):
 
     def menu_file_import_film(self):
         filename = askopenfilename(
-            initialdir="/", title="Film File",
+            initialdir=self.data_folder, title="Film File",
             filetypes=(("Film Files", "*.png"), ("all files", "*.*")))
         self.profiles.append(Profile().from_narrow_png(filename))
         self.update('menu_file_import_film')
 
     def menu_file_import_profiler(self):
         filename = askopenfilename(
-            initialdir="/", title="SNC Profiler",
+            initialdir=self.data_folder, title="SNC Profiler",
             filetypes=(("Profiler Files", "*.prs"), ("all files", "*.*")))
         self.profiles.append(Profile().from_snc_profiler(filename, 'rad'))
         self.profiles.append(Profile().from_snc_profiler(filename, 'tvs'))
@@ -269,27 +265,20 @@ class Application(tk.Frame):
         step_window = tk.Tk()
         step_window.title("Step Size")
         step_window.grid()
-        step = tk.DoubleVar(value=0.1)
+        step = tk.StringVar(step_window, value=0.1)
         label = tk.Label(step_window, width=10, text="Step size")
         entry = tk.Entry(step_window, width=10, textvariable=step)
-        entry.insert(tk.END, 0.1)
         label.grid(column=0, row=0, sticky=tk.E)
         entry.grid(column=1, row=0)
         def OK():
-            print(step.get())
-            ###
-            self.update('menu_import_pulse')
+            p = self.selected_profile.get()
+            new_profile = self.profiles[p].resample_x(float(step.get()))
+            self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+            self.update('menu_resample_x')
             step_window.destroy()
         ok_button = tk.Button(step_window, text="OK", command=OK)
-        ok_button.grid(column=0, row=1, columnspan=2)
+        ok_button.grid(column=0, row=10, columnspan=2)
         step_window.mainloop()
-
-        step = 0.01
-        new_profile = self.profiles[self.selected_profile.get()].resample_x(step)
-        print(new_profile)
-
-        ########################
-        ########################
 
 
     def on_key_press(self, event):
