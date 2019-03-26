@@ -89,7 +89,7 @@ class Menu(tk.Frame):
             import_submenu.add_command(label="Pulse", command=master.menu_import_pulse)
             filemenu.add_cascade(label='Import ...', menu=import_submenu)
             ## =====
-            filemenu.add_command(label="Clear Selected", command=master.menu_file_clear_selected)
+            filemenu.add_command(label="Clear Selected", command=master.file_clr)
             ## =====
             filemenu.add_command(label="Clear All", command=master.menu_file_clear_all)
             ## =====
@@ -220,6 +220,7 @@ class Application(tk.Frame):
             filetypes=(("Film Files", "*.png"), ("all files", "*.*")))
         self.profiles.append(Profile().from_narrow_png(filename))
         self.update('menu_file_import_film')
+        self.set_active_profile(len(self.profiles)-1)
 
     def menu_file_import_profiler(self):
         filename = askopenfilename(
@@ -228,6 +229,7 @@ class Application(tk.Frame):
         self.profiles.append(Profile().from_snc_profiler(filename, 'rad'))
         self.profiles.append(Profile().from_snc_profiler(filename, 'tvs'))
         self.update('menu_file_import_profiler')
+        self.set_active_profile(len(self.profiles)-1)
 
     def menu_import_pulse(self):
         pulse_window = tk.Tk()
@@ -248,14 +250,15 @@ class Application(tk.Frame):
             self.profiles.append(Profile().from_pulse(*p))
             self.selected_profile.set(len(self.profiles)-1)
             self.update('menu_import_pulse')
+            self.set_active_profile(len(self.profiles)-1)
             pulse_window.destroy()
         ok_button = tk.Button(pulse_window, text="OK", command=OK)
         ok_button.grid(column=0, row=6, columnspan=2)
         pulse_window.mainloop()
 
-    def menu_file_clear_selected(self):
+    def file_clr(self):
         self.profiles.pop(self.selected_profile.get())
-        self.update('menu_file_clear_selected')
+        self.update('file_clr')
         
     def menu_file_clear_all(self):
         self.profiles = []
@@ -279,7 +282,6 @@ class Application(tk.Frame):
         ok_button = tk.Button(step_window, text="OK", command=OK)
         ok_button.grid(column=0, row=10, columnspan=2)
         step_window.mainloop()
-
 
     def on_key_press(self, event):
         print("you pressed {}".format(event.key))
