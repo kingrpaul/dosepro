@@ -96,6 +96,9 @@ class Menu(tk.Frame):
             editmenu.add_command(label="Flip", command=master.edit_flip)
             ## =====
             editmenu.add_command(label="Symmetrise", command=master.edit_symmetrise)
+            ## =====
+            editmenu.add_command(label="Centre", command=self.menu_stub)
+
         edit_menu()
 
         def get_menu():
@@ -336,8 +339,6 @@ class Application(tk.Frame):
             self.update('edit_symmetrise')
         except IndexError:
             pass
-
-
 
 
     def on_key_press(self, event):
