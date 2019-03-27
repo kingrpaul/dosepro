@@ -154,17 +154,11 @@ class Application(tk.Frame):
         self.status_bar.pack(fill=tk.X, expand=False, side=tk.LEFT)
         self.status.set("__init__")
 
-        self.menu = Menu(self)
-
-        self.profiles = []
-
         self.color_palette = {'idx': 0, 'val': dict(enumerate(
             ['red', 'green', 'orange', 'blue', 'yellow', 'purple1', 'grey']*5))}
 
         self.data_folder = os.path.join(str.split(__file__, 'src')[0], 
                            'tests','test_labs', 'test_paulking', 'data')
-
-        self.buttons = []
         self.selector = tk.Frame(selector_frame)
         self.selector.pack(side=tk.TOP, fill="both", expand=True)
         self.selected_profile = tk.IntVar(value=0)
@@ -349,36 +343,6 @@ class Application(tk.Frame):
         ok_button = tk.Button(win, text="OK", command=OK)
         ok_button.grid(column=0, row=10, columnspan=2)
         win.mainloop()
-
-    # def get_value(self, coord):
-    #     value_window = tk.Tk()
-    #     value_window.title("Get Value")
-    #     value_window.grid()
-    #     other_coord = {'x':'y', 'y':'x'}[coord]
-    #     value = tk.StringVar(value_window, value=0.0)
-    #     label = tk.Label(value_window, width=10, text=str(other_coord))
-    #     entry = tk.Entry(value_window, width=10, textvariable=value)
-    #     label.grid(column=0, row=0, sticky=tk.E)
-    #     entry.grid(column=1, row=0)
-    #     def OK():
-    #         try:
-    #             v = float(value.get())
-    #             p = self.selected_profile.get()
-    #             if coord == 'x':
-    #                 result = self.profiles[p].get_x(v)
-    #                 if result:
-    #                     self.update('x_value: '+ str(coord) + ' - ')
-    #             if coord == 'y':
-    #                 result = self.profiles[p].get_y(value)
-    #                 print(result)
-    #                 if result:
-    #                     self.update('x='+'{:.2f}'.format(v)+' -> y_value: ' + '{:.2f}'.format(result))
-    #         except IndexError:
-    #             pass
-    #         value_window.destroy()
-    #     ok_button = tk.Button(value_window, text="OK", command=OK)
-    #     ok_button.grid(column=0, row=10, columnspan=2)
-    #     value_window.mainloop()
 
     def normalise_y(self):
         norm_window = tk.Tk()
