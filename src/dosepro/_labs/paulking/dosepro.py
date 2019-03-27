@@ -36,7 +36,7 @@ from matplotlib.figure import Figure
 
 from functools import partial
 
-if "dosepro\dosepro" in __file__:
+if r"dosepro\dosepro" in __file__:
     add_path = os.path.abspath(os.path.join(__file__, '..','..','..','..'))
     add_path = os.path.join(add_path, 'src', 'dosepro', '_labs', 'paulking')
     sys.path.insert(0,add_path)
@@ -92,9 +92,11 @@ class Menu(tk.Frame):
             menu.add_cascade(label="Get", menu=getmenu)
             ## =====    
             value_submenu = tk.Menu(getmenu)
-            value_submenu.add_command(label="X", command=self.menu_stub)
-            value_submenu.add_command(label="Y", command=self.menu_stub)
+            value_submenu.add_command(label="X", command=master.get_x)
+            value_submenu.add_command(label="Y", command=master.get_y)
             getmenu.add_cascade(label='Value ...', menu=value_submenu)
+            ## =====
+            getmenu.add_command(label="Increment", command=master.get_incr)
             ## =====
             getmenu.add_command(label="Edges", command=master.get_edges)
             ## =====
@@ -281,6 +283,94 @@ class Application(tk.Frame):
         ok_button = tk.Button(step_window, text="OK", command=OK)
         ok_button.grid(column=0, row=10, columnspan=2)
         step_window.mainloop()
+ 
+    def get_incr(self):
+        pass
+
+    def get_x(self):
+        win = tk.Tk()
+        win.title("Get Y")
+        win.grid()
+        y = tk.StringVar(win, value=100.0)
+        label = tk.Label(win, width=10, text='y')
+        entry = tk.Entry(win, width=10, textvariable=y)
+        label.grid(column=0, row=0, sticky=tk.E)
+        entry.grid(column=1, row=0)
+        def OK():
+            try:
+                v = float(y.get())
+                p = self.selected_profile.get()
+                result = self.profiles[p].get_x(v)
+                print(result)
+                result_string = '('
+                if result:
+                    for r in result:
+                        result_string += '{:.2f}'.format(r) + ', '
+                    result_string = result_string[:-2] + ')'
+                    self.update('x='+ str(v) +'  ->  '+'y='+result_string)
+                else:
+                    self.update('')
+            except IndexError:
+                pass
+            win.destroy()
+        ok_button = tk.Button(win, text="OK", command=OK)
+        ok_button.grid(column=0, row=10, columnspan=2)
+        win.mainloop()
+
+
+    def get_y(self):
+        win = tk.Tk()
+        win.title("Get X")
+        win.grid()
+        x = tk.StringVar(win, value=0.0)
+        label = tk.Label(win, width=10, text='x')
+        entry = tk.Entry(win, width=10, textvariable=x)
+        label.grid(column=0, row=0, sticky=tk.E)
+        entry.grid(column=1, row=0)
+        def OK():
+            try:
+                v = float(x.get())
+                p = self.selected_profile.get()
+                result = self.profiles[p].get_y(v)
+                print(result)
+                if result:
+                    self.update('x='+ str(v) +'  ->  '+'y='+'{:.2f}'.format(result))
+            except IndexError:
+                pass
+            win.destroy()
+        ok_button = tk.Button(win, text="OK", command=OK)
+        ok_button.grid(column=0, row=10, columnspan=2)
+        win.mainloop()
+
+    # def get_value(self, coord):
+    #     value_window = tk.Tk()
+    #     value_window.title("Get Value")
+    #     value_window.grid()
+    #     other_coord = {'x':'y', 'y':'x'}[coord]
+    #     value = tk.StringVar(value_window, value=0.0)
+    #     label = tk.Label(value_window, width=10, text=str(other_coord))
+    #     entry = tk.Entry(value_window, width=10, textvariable=value)
+    #     label.grid(column=0, row=0, sticky=tk.E)
+    #     entry.grid(column=1, row=0)
+    #     def OK():
+    #         try:
+    #             v = float(value.get())
+    #             p = self.selected_profile.get()
+    #             if coord == 'x':
+    #                 result = self.profiles[p].get_x(v)
+    #                 if result:
+    #                     self.update('x_value: '+ str(coord) + ' - ')
+    #             if coord == 'y':
+    #                 result = self.profiles[p].get_y(value)
+    #                 print(result)
+    #                 if result:
+    #                     self.update('x='+'{:.2f}'.format(v)+' -> y_value: ' + '{:.2f}'.format(result))
+    #         except IndexError:
+    #             pass
+    #         value_window.destroy()
+    #     ok_button = tk.Button(value_window, text="OK", command=OK)
+    #     ok_button.grid(column=0, row=10, columnspan=2)
+    #     value_window.mainloop()
 
     def normalise_y(self):
         norm_window = tk.Tk()
