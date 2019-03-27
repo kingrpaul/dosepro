@@ -93,9 +93,9 @@ class Menu(tk.Frame):
             normalise_submenu.add_command(label="Y", command=master.normalise_y)
             editmenu.add_cascade(label='Normalise ...', menu=normalise_submenu)
             ## =====
-            editmenu.add_command(label="Flip", command=self.menu_stub)
+            editmenu.add_command(label="Flip", command=master.edit_flip)
             ## =====
-            editmenu.add_command(label="Symmetrise", command=self.menu_stub)
+            editmenu.add_command(label="Symmetrise", command=master.edit_symmetrise)
         edit_menu()
 
         def get_menu():
@@ -136,6 +136,7 @@ class Application(tk.Frame):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
         root.wm_title("Profile Tool")
+        root.resizable(False, False)
 
         selector_frame = tk.Frame(self, width=5, height=100, background="bisque")
         graph_frame = tk.Frame(self, width=90, height=100, background="bisque")
@@ -316,6 +317,27 @@ class Application(tk.Frame):
             self.update('normalise_y')
         except IndexError:
             pass
+
+    def edit_flip(self):
+        try:
+            p = self.selected_profile.get()
+            new_profile = self.profiles[p].make_flipped()
+            self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+            self.update('edit_flip')
+        except IndexError:
+            pass
+
+
+    def edit_symmetrise(self):
+        try:
+            p = self.selected_profile.get()
+            new_profile = self.profiles[p].make_symmetric()
+            self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+            self.update('edit_symmetrise')
+        except IndexError:
+            pass
+
+
 
 
     def on_key_press(self, event):
