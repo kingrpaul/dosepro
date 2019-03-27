@@ -90,7 +90,7 @@ class Menu(tk.Frame):
             ## =====    
             normalise_submenu = tk.Menu(editmenu)
             normalise_submenu.add_command(label="X", command=self.menu_stub)
-            normalise_submenu.add_command(label="Y", command=self.menu_stub)
+            normalise_submenu.add_command(label="Y", command=master.normalise_y)
             editmenu.add_cascade(label='Normalise ...', menu=normalise_submenu)
             ## =====
             editmenu.add_command(label="Flip", command=self.menu_stub)
@@ -281,11 +281,32 @@ class Application(tk.Frame):
         ok_button.grid(column=0, row=10, columnspan=2)
         step_window.mainloop()
 
-
-    def resample_y(self):
-        pass
-
-
+    def normalise_y(self):
+        norm_window = tk.Tk()
+        norm_window.title("Normalization")
+        norm_window.grid()
+        x = tk.StringVar(norm_window, value=0.0)
+        y = tk.StringVar(norm_window, value=1.0)
+        x_label = tk.Label(norm_window, width=10, text="Norm distance")
+        y_label = tk.Label(norm_window, width=10, text="Norm value")        
+        x_entry = tk.Entry(norm_window, width=10, textvariable=x)
+        y_entry = tk.Entry(norm_window, width=10, textvariable=y)
+        x_label.grid(column=0, row=0, sticky=tk.E)
+        y_label.grid(column=0, row=1, sticky=tk.E)
+        x_entry.grid(column=1, row=0)
+        y_entry.grid(column=1, row=1)
+        def OK():
+            try:
+                p = self.selected_profile.get()
+                new_profile = self.profiles[p].make_normal_y(x=float(x.get()),y=float(y.get()))
+                self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+                self.update('normalise_y')
+            except IndexError:
+                pass
+            norm_window.destroy()
+        ok_button = tk.Button(norm_window, text="OK", command=OK)
+        ok_button.grid(column=0, row=10, columnspan=2)
+        norm_window.mainloop()
 
 
     def on_key_press(self, event):
