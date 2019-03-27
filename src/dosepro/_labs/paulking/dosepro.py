@@ -44,20 +44,6 @@ if "dosepro\dosepro" in __file__:
 else:
     from pymedphys._labs.paulking.profile import Profile
 
-class Color():
-    def __init__(self):
-        self.color_palette = ['red', 'green', 'orange', 'blue', 'yellow', 'purple1', 'black'
-                        'red', 'green', 'orange', 'blue', 'yellow', 'purple1', 'black']
-        self.from_color_palette = (c for c in self.color_palette)
-        self.current = next(self.from_color_palette)
-    def get(self):
-        return self.current
-    def next(self):
-        self.current = next(self.from_color_palette)
-    def reset(self):
-        self.__init__()
-
-
 class Menu(tk.Frame):
     def __init__(self, master):
         menu = tk.Menu(root)
@@ -99,7 +85,6 @@ class Menu(tk.Frame):
             editmenu.add_command(label="Symmetrise", command=master.edit_symmetrise)
             ## =====
             editmenu.add_command(label="Centre", command=master.edit_centre)
-
         edit_menu()
 
         def get_menu():
@@ -111,7 +96,7 @@ class Menu(tk.Frame):
             value_submenu.add_command(label="Y", command=self.menu_stub)
             getmenu.add_cascade(label='Value ...', menu=value_submenu)
             ## =====
-            getmenu.add_command(label="Edges", command=self.menu_stub)
+            getmenu.add_command(label="Edges", command=master.get_edges)
             ## =====
             getmenu.add_command(label="Flatness", command=self.menu_stub)
             ## =====
@@ -158,7 +143,6 @@ class Application(tk.Frame):
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         self.canvas.mpl_connect("key_press_event", self.on_key_press)
 
-        ## self.status
         self.status = tk.StringVar() 
         self.status_bar = tk.Frame(master=graph_frame, relief=tk.RIDGE, background="bisque")
         self.status_label=tk.Label(self.status_bar, bd=1, relief=tk.FLAT, anchor=tk.W, 
@@ -171,10 +155,8 @@ class Application(tk.Frame):
         self.menu = Menu(self)
         self.profiles = []
 
-        self.color_palette = {'idx': 0, 
-                'val': dict(enumerate(['red', 'green', 'orange', 
-                        'blue', 'yellow', 'purple1', 'black']*5))}
-
+        self.color_palette = {'idx': 0, 'val': dict(enumerate(
+            ['red', 'green', 'orange', 'blue', 'yellow', 'purple1', 'grey']*5))}
 
         self.data_folder = os.path.join(str.split(__file__, 'src')[0], 
                            'tests','test_labs', 'test_paulking', 'data')
@@ -201,8 +183,6 @@ class Application(tk.Frame):
         self.buttons[i].config(relief=tk.SUNKEN)
 
     def update(self, msg):
-        selected_profile = self.selected_profile.get()
-        # self.color.reset()
         self.color('reset')
         self.subplot.cla()
         self.buttons = []
@@ -219,6 +199,10 @@ class Application(tk.Frame):
             button.pack(side=tk.TOP, fill='both')
             self.buttons.append(button)
             self.color('next')
+        try:
+            self.select_active(self.selected_profile.get())
+        except IndexError:
+            pass
         self.status.set(msg)
         self.canvas.draw()
 
@@ -363,6 +347,16 @@ class Application(tk.Frame):
         except IndexError:
             pass
 
+    def get_edges(self):
+        try:
+            p = self.selected_profile.get()
+            print(self.profiles[p].get_edges())
+            e = self.profiles[p].get_edges()
+            result = "Edges: ( {0:.1f}, {1:.1f})".format(e[0], e[1])
+            self.update(result)
+        except IndexError:
+            pass
+        
 
 
     def on_key_press(self, event):
