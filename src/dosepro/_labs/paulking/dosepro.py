@@ -97,7 +97,7 @@ class Menu(tk.Frame):
             ## =====
             editmenu.add_command(label="Symmetrise", command=master.edit_symmetrise)
             ## =====
-            editmenu.add_command(label="Centre", command=self.menu_stub)
+            editmenu.add_command(label="Centre", command=master.edit_centre)
 
         edit_menu()
 
@@ -339,6 +339,17 @@ class Application(tk.Frame):
             self.update('edit_symmetrise')
         except IndexError:
             pass
+
+
+    def edit_centre(self):
+        try:
+            p = self.selected_profile.get()
+            new_profile = self.profiles[p].make_centered()
+            self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+            self.update('edit_symmetrise')
+        except IndexError:
+            pass
+
 
 
     def on_key_press(self, event):
