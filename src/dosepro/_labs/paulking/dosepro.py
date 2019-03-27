@@ -67,14 +67,14 @@ class Menu(tk.Frame):
             menu.add_cascade(label="File", menu=filemenu)
             ## =====
             import_submenu = tk.Menu(filemenu)  ## =====
-            import_submenu.add_command(label="Profiler", command=master.menu_file_import_profiler)
-            import_submenu.add_command(label="Film", command=master.menu_file_import_film)
-            import_submenu.add_command(label="Pulse", command=master.menu_import_pulse)
+            import_submenu.add_command(label="Profiler", command=master.file_import_prs)
+            import_submenu.add_command(label="Film", command=master.file_import_png)
+            import_submenu.add_command(label="Pulse", command=master.file_import_pulse)
             filemenu.add_cascade(label='Import ...', menu=import_submenu)
             ## =====
             filemenu.add_command(label="Clear Selected", command=master.file_clr)
             ## =====
-            filemenu.add_command(label="Clear All", command=master.menu_file_clear_all)
+            filemenu.add_command(label="Clear All", command=master.file_clr_all)
             ## =====
             filemenu.add_command(label="Exit", command=master._quit)
         file_menu()
@@ -84,8 +84,8 @@ class Menu(tk.Frame):
             menu.add_cascade(label="Edit", menu=editmenu)
             ## =====
             resample_submenu = tk.Menu(editmenu)  
-            resample_submenu.add_command(label="X", command=master.menu_resample_x)
-            resample_submenu.add_command(label="Y", command=self.menu_stub)
+            resample_submenu.add_command(label="X", command=partial(master.resample, 'x'))
+            resample_submenu.add_command(label="Y", command=partial(master.resample, 'y'))
             editmenu.add_cascade(label='Resample ...', menu=resample_submenu)
             ## =====    
             normalise_submenu = tk.Menu(editmenu)
@@ -139,8 +139,9 @@ class Application(tk.Frame):
 
         selector_frame = tk.Frame(self, width=5, height=100, background="bisque")
         graph_frame = tk.Frame(self, width=90, height=100, background="bisque")
-        selector_frame.pack(side=tk.LEFT)
-        graph_frame.pack(side=tk.RIGHT)
+
+        selector_frame.pack(side=tk.LEFT, fill=tk.BOTH)
+        graph_frame.pack(side=tk.RIGHT, fill=tk.BOTH)
 
         fig = Figure(figsize=(6, 5), dpi=100)
         self.canvas = FigureCanvasTkAgg(fig, master=graph_frame)
@@ -154,9 +155,9 @@ class Application(tk.Frame):
 
         ## self.status
         self.status = tk.StringVar() 
-        self.status_bar = tk.Frame(master=graph_frame, relief=tk.RIDGE)
+        self.status_bar = tk.Frame(master=graph_frame, relief=tk.RIDGE, background="bisque")
         self.status_label=tk.Label(self.status_bar, bd=1, relief=tk.FLAT, anchor=tk.W, 
-                                   textvariable=self.status, 
+                                   textvariable=self.status, background="bisque", 
                                    font=('arial',10,'normal'))
         self.status_label.pack(fill=tk.X, expand=True, side=tk.LEFT) 
         self.status_bar.pack(fill=tk.X, expand=False, side=tk.LEFT)
@@ -177,7 +178,7 @@ class Application(tk.Frame):
         self.update('__init__')
         self.canvas.draw()
 
-    def set_active_profile(self, i):
+    def select_active(self, i):
         for J in range(len(self.buttons)):
             self.buttons[J].config(relief=tk.RAISED)    
         self.selected_profile.set(i)
@@ -197,31 +198,31 @@ class Application(tk.Frame):
             self.subplot.plot(profile.x, profile.y, color=self.color.get())
             button = tk.Button(master=self.selector,
                         bg=self.color.get(), text=str(i), width=10,
-                        command=partial(self.set_active_profile, i))
+                        command=partial(self.select_active, i))
             button.pack(side=tk.TOP, fill='both')
             self.buttons.append(button)
             self.color.next()
         self.status.set(msg)
         self.canvas.draw()
 
-    def menu_file_import_film(self):
+    def file_import_png(self):
         filename = askopenfilename(
             initialdir=self.data_folder, title="Film File",
             filetypes=(("Film Files", "*.png"), ("all files", "*.*")))
         self.profiles.append(Profile().from_narrow_png(filename))
-        self.update('menu_file_import_film')
-        self.set_active_profile(len(self.profiles)-1)
+        self.update('file_import_png')
+        self.select_active(len(self.profiles)-1)
 
-    def menu_file_import_profiler(self):
+    def file_import_prs(self):
         filename = askopenfilename(
             initialdir=self.data_folder, title="SNC Profiler",
             filetypes=(("Profiler Files", "*.prs"), ("all files", "*.*")))
         self.profiles.append(Profile().from_snc_profiler(filename, 'rad'))
         self.profiles.append(Profile().from_snc_profiler(filename, 'tvs'))
-        self.update('menu_file_import_profiler')
-        self.set_active_profile(len(self.profiles)-1)
+        self.update('file_import_prs')
+        self.select_active(len(self.profiles)-1)
 
-    def menu_import_pulse(self):
+    def file_import_pulse(self):
         pulse_window = tk.Tk()
         pulse_window.title("Pulse Parameters")
         pulse_window.grid()
@@ -239,8 +240,8 @@ class Application(tk.Frame):
             p = [p[0], p[1], (p[2], p[3]), p[4]]
             self.profiles.append(Profile().from_pulse(*p))
             self.selected_profile.set(len(self.profiles)-1)
-            self.update('menu_import_pulse')
-            self.set_active_profile(len(self.profiles)-1)
+            self.update('file_import_pulse')
+            self.select_active(len(self.profiles)-1)
             pulse_window.destroy()
         ok_button = tk.Button(pulse_window, text="OK", command=OK)
         ok_button.grid(column=0, row=6, columnspan=2)
@@ -250,11 +251,12 @@ class Application(tk.Frame):
         self.profiles.pop(self.selected_profile.get())
         self.update('file_clr')
         
-    def menu_file_clear_all(self):
+    def file_clr_all(self):
         self.profiles = []
-        self.update('menu_file_clear_all')
-
-    def menu_resample_x(self):
+        self.update('file_clr_all')
+    
+    def resample(self, axis):
+        assert axis in ('x','y')
         step_window = tk.Tk()
         step_window.title("Step Size")
         step_window.grid()
@@ -264,14 +266,27 @@ class Application(tk.Frame):
         label.grid(column=0, row=0, sticky=tk.E)
         entry.grid(column=1, row=0)
         def OK():
-            p = self.selected_profile.get()
-            new_profile = self.profiles[p].resample_x(float(step.get()))
-            self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
-            self.update('menu_resample_x')
+            try:
+                p = self.selected_profile.get()
+                if axis == 'x':
+                    new_profile = self.profiles[p].resample_x(float(step.get()))
+                if axis == 'y':
+                    new_profile = self.profiles[p].resample_y(float(step.get()))
+                self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+                self.update('resample_'+axis)
+            except IndexError:
+                pass
             step_window.destroy()
         ok_button = tk.Button(step_window, text="OK", command=OK)
         ok_button.grid(column=0, row=10, columnspan=2)
         step_window.mainloop()
+
+
+    def resample_y(self):
+        pass
+
+
+
 
     def on_key_press(self, event):
         print("you pressed {}".format(event.key))
