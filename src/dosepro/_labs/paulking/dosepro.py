@@ -155,6 +155,7 @@ class Application(tk.Frame):
         self.status.set("__init__")
 
         self.menu = Menu(self)
+
         self.profiles = []
 
         self.color_palette = {'idx': 0, 'val': dict(enumerate(
@@ -285,7 +286,14 @@ class Application(tk.Frame):
         step_window.mainloop()
  
     def get_incr(self):
-        pass
+        try:
+            p = self.selected_profile.get()
+            e = self.profiles[p].get_increment()
+            result = "Spacing: {0:.1f} cm".format(e)
+            self.update(result)
+        except IndexError:
+            pass
+
 
     def get_x(self):
         win = tk.Tk()
