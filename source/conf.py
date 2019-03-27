@@ -12,21 +12,21 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-sys.path.insert(0, os.path.abspath('../src'))
+# import os
+# import sys
+# sys.path.insert(0, os.path.abspath('.'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'dosepro'
+project = 'Dose Profile Utility'
 copyright = '2019, Paul King'
 author = 'Paul King'
 
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '0.0'
+release = '2019'
 
 
 # -- General configuration ---------------------------------------------------
@@ -41,6 +41,9 @@ release = '0.0'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
@@ -48,7 +51,7 @@ extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['ytemplates']
+templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -69,7 +72,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = ['ybuild', 'Thumbs.db', '.DS_Store']
+exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -91,7 +94,7 @@ html_theme = 'alabaster'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['ystatic']
+html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -107,7 +110,7 @@ html_static_path = ['ystatic']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'doseprodoc'
+htmlhelp_basename = 'DoseProfileUtilitydoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -134,7 +137,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'dosepro.tex', 'dosepro Documentation',
+    (master_doc, 'DoseProfileUtility.tex', 'Dose Profile Utility Documentation',
      'Paul King', 'manual'),
 ]
 
@@ -144,7 +147,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'dosepro', 'dosepro Documentation',
+    (master_doc, 'doseprofileutility', 'Dose Profile Utility Documentation',
      [author], 1)
 ]
 
@@ -155,31 +158,20 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'dosepro', 'dosepro Documentation',
-     author, 'dosepro', 'One line description of project.',
+    (master_doc, 'DoseProfileUtility', 'Dose Profile Utility Documentation',
+     author, 'DoseProfileUtility', 'One line description of project.',
      'Miscellaneous'),
 ]
 
 
-# -- Options for Epub output -------------------------------------------------
-
-# Bibliographic Dublin Core info.
-epub_title = project
-epub_author = author
-epub_publisher = author
-epub_copyright = copyright
-
-# The unique identifier of the text. This can be a ISBN number
-# or the project homepage.
-#
-# epub_identifier = ''
-
-# A unique identification for the text.
-#
-# epub_uid = ''
-
-# A list of files that should not be packed into the epub file.
-epub_exclude_files = ['search.html']
-
-
 # -- Extension configuration -------------------------------------------------
+
+# -- Options for intersphinx extension ---------------------------------------
+
+# Example configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {'https://docs.python.org/': None}
+
+# -- Options for todo extension ----------------------------------------------
+
+# If true, `todo` and `todoList` produce output, else they produce nothing.
+todo_include_todos = True
