@@ -89,7 +89,7 @@ class Menu(tk.Frame):
             editmenu.add_cascade(label='Resample ...', menu=resample_submenu)
             ## =====    
             normalise_submenu = tk.Menu(editmenu)
-            normalise_submenu.add_command(label="X", command=self.menu_stub)
+            normalise_submenu.add_command(label="X", command=master.normalise_x)
             normalise_submenu.add_command(label="Y", command=master.normalise_y)
             editmenu.add_cascade(label='Normalise ...', menu=normalise_submenu)
             ## =====
@@ -307,6 +307,15 @@ class Application(tk.Frame):
         ok_button = tk.Button(norm_window, text="OK", command=OK)
         ok_button.grid(column=0, row=10, columnspan=2)
         norm_window.mainloop()
+
+    def normalise_x(self):
+        try:
+            p = self.selected_profile.get()
+            new_profile = self.profiles[p].make_normal_x()
+            self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+            self.update('normalise_y')
+        except IndexError:
+            pass
 
 
     def on_key_press(self, event):
