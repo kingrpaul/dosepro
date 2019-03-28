@@ -2,7 +2,7 @@
 
 .. toctree::
     :maxdepth: 1
-    :caption: Nope
+    :caption: Items
 
     labs/paulking/profile.rst
     labs/paulking/gui.rst
