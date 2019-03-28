@@ -253,7 +253,13 @@ class Application(tk.Frame):
             pass
 
     def get_symmetry(self):
-        pass
+        try:
+            p = self.selected_profile.get()
+            e = 100 * self.profiles[p].get_symmetry()
+            result = "Symmetry: ( {0:.2f}%)".format(e)
+            self.update(result)
+        except IndexError:
+            pass
 
     def get_x(self):
         win = tk.Tk()
