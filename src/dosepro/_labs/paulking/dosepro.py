@@ -36,7 +36,7 @@ from matplotlib.figure import Figure
 
 from functools import partial
 
-if "dosepro\dosepro" in __file__:
+if r"dosepro\dosepro" in __file__:
     add_path = os.path.abspath(os.path.join(__file__, '..','..','..','..'))
     add_path = os.path.join(add_path, 'src', 'dosepro', '_labs', 'paulking')
     sys.path.insert(0,add_path)
@@ -44,95 +44,6 @@ if "dosepro\dosepro" in __file__:
 else:
     from pymedphys._labs.paulking.profile import Profile
 
-class Color():
-    def __init__(self):
-        self.palette = ['red', 'green', 'orange', 'blue', 'yellow', 'purple1', 'black'
-                        'red', 'green', 'orange', 'blue', 'yellow', 'purple1', 'black']
-        self.from_palette = (c for c in self.palette)
-        self.current = next(self.from_palette)
-    def get(self):
-        return self.current
-    def next(self):
-        self.current = next(self.from_palette)
-    def reset(self):
-        self.__init__()
-
-class Menu(tk.Frame):
-    def __init__(self, master):
-        menu = tk.Menu(root)
-        root.config(menu=menu)
-
-        def file_menu():
-            filemenu = tk.Menu(menu)
-            menu.add_cascade(label="File", menu=filemenu)
-            ## =====
-            import_submenu = tk.Menu(filemenu)  ## =====
-            import_submenu.add_command(label="Profiler", command=master.file_import_prs)
-            import_submenu.add_command(label="Film", command=master.file_import_png)
-            import_submenu.add_command(label="Pulse", command=master.file_import_pulse)
-            filemenu.add_cascade(label='Import ...', menu=import_submenu)
-            ## =====
-            filemenu.add_command(label="Clear Selected", command=master.file_clr)
-            ## =====
-            filemenu.add_command(label="Clear All", command=master.file_clr_all)
-            ## =====
-            filemenu.add_command(label="Exit", command=master._quit)
-        file_menu()
-
-        def edit_menu():
-            editmenu = tk.Menu(menu)
-            menu.add_cascade(label="Edit", menu=editmenu)
-            ## =====
-            resample_submenu = tk.Menu(editmenu)  
-            resample_submenu.add_command(label="X", command=partial(master.resample, 'x'))
-            resample_submenu.add_command(label="Y", command=partial(master.resample, 'y'))
-            editmenu.add_cascade(label='Resample ...', menu=resample_submenu)
-            ## =====    
-            normalise_submenu = tk.Menu(editmenu)
-            normalise_submenu.add_command(label="X", command=master.normalise_x)
-            normalise_submenu.add_command(label="Y", command=master.normalise_y)
-            editmenu.add_cascade(label='Normalise ...', menu=normalise_submenu)
-            ## =====
-            editmenu.add_command(label="Flip", command=master.edit_flip)
-            ## =====
-            editmenu.add_command(label="Symmetrise", command=master.edit_symmetrise)
-            ## =====
-            editmenu.add_command(label="Centre", command=self.menu_stub)
-
-        edit_menu()
-
-        def get_menu():
-            getmenu = tk.Menu(menu)
-            menu.add_cascade(label="Get", menu=getmenu)
-            ## =====    
-            value_submenu = tk.Menu(getmenu)
-            value_submenu.add_command(label="X", command=self.menu_stub)
-            value_submenu.add_command(label="Y", command=self.menu_stub)
-            getmenu.add_cascade(label='Value ...', menu=value_submenu)
-            ## =====
-            getmenu.add_command(label="Edges", command=self.menu_stub)
-            ## =====
-            getmenu.add_command(label="Flatness", command=self.menu_stub)
-            ## =====
-            getmenu.add_command(label="Symmetry", command=self.menu_stub)
-            # ## =====
-            segment_submenu = tk.Menu(getmenu)
-            segment_submenu.add_command(label="Defined", command=self.menu_stub)
-            segment_submenu.add_command(label="Umbra", command=self.menu_stub)
-            segment_submenu.add_command(label="Penumbra", command=self.menu_stub)
-            segment_submenu.add_command(label="Shoulders", command=self.menu_stub)
-            segment_submenu.add_command(label="Tails", command=self.menu_stub)
-            getmenu.add_cascade(label='Segment ...', menu=segment_submenu)
-        get_menu()
-
-        def help_menu():
-            helpmenu = tk.Menu(menu)
-            menu.add_cascade(label="Help", menu=helpmenu)
-            helpmenu.add_command(label="About...", command=master.about)
-        help_menu()
-
-    def menu_stub(self):
-        pass
 
 class Application(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -157,30 +68,82 @@ class Application(tk.Frame):
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         self.canvas.mpl_connect("key_press_event", self.on_key_press)
 
-        ## self.status
-        self.status = tk.StringVar() 
+        self.status = tk.StringVar()
         self.status_bar = tk.Frame(master=graph_frame, relief=tk.RIDGE, background="bisque")
         self.status_label=tk.Label(self.status_bar, bd=1, relief=tk.FLAT, anchor=tk.W, 
                                    textvariable=self.status, background="bisque", 
                                    font=('arial',10,'normal'))
         self.status_label.pack(fill=tk.X, expand=True, side=tk.LEFT) 
         self.status_bar.pack(fill=tk.X, expand=False, side=tk.LEFT)
-        self.status.set("__init__")
 
-        self.color = Color()
-        self.menu = Menu(self)
+        self._color_palette = {'idx': 0, 'val': dict(enumerate(
+            ['red', 'green', 'orange', 'blue', 'yellow', 'purple1', 'grey']*5))}
 
+        menu = tk.Menu(root)
+        root.config(menu=menu)
+        ## ----------
+        _file = tk.Menu(menu)
+        __from = tk.Menu(_file)
+        _edit = tk.Menu(menu)
+        __resample = tk.Menu(_edit)  
+        __normalise = tk.Menu(_edit)
+        _get = tk.Menu(menu)
+        __value = tk.Menu(_get)
+        __segment = tk.Menu(_get)
+        _help = tk.Menu(menu)
+        ## ----------
+        menu.add_cascade(label="File", menu=_file)
+        _file.add_cascade(label='From ...', menu=__from)
+        __from.add_command(label="Film", command=self.from_narrow_png)
+        __from.add_command(label="Pulse", command=self.from_pulse)
+        __from.add_command(label="Profiler", command=self.from_snc_profiler)
+        _file.add_command(label="Clear Selected", command=self.file_clr)
+        _file.add_command(label="Clear All", command=self.file_clr_all)
+        _file.add_command(label="Exit", command=self._quit)
+        menu.add_cascade(label="Edit", menu=_edit)
+        _edit.add_cascade(label='Resample ...', menu=__resample)
+        __resample.add_command(label="X", command=self.resample_x)
+        __resample.add_command(label="Y", command=self.resample_y)
+        _edit.add_cascade(label='Normalise ...', menu=__normalise)
+        __normalise.add_command(label="X", command=self.make_normal_x)
+        __normalise.add_command(label="Y", command=self.make_normal_y)
+        _edit.add_command(label="Flip", command=self.make_flipped)
+        _edit.add_command(label="Symmetrise", command=self.make_symmetric)
+        _edit.add_command(label="Centre", command=self.make_centered)
+        menu.add_cascade(label="Get", menu=_get)
+        _get.add_cascade(label='Value ...', menu=__value)
+        __value.add_command(label="X", command=self.get_x)
+        __value.add_command(label="Y", command=self.get_y)
+        _get.add_command(label="Increment", command=self.get_increment)
+        _get.add_command(label="Edges", command=self.get_edges)
+        _get.add_command(label="Flatness", command=self.get_flatness)
+        _get.add_command(label="Symmetry", command=self.get_symmetry)
+        _get.add_cascade(label='Segment ...', menu=__segment)
+        __segment.add_command(label="Defined", command=self.slice_segment)
+        __segment.add_command(label="Umbra", command=self.slice_segment)
+        __segment.add_command(label="Penumbra", command=self.slice_penumbra)
+        __segment.add_command(label="Shoulders", command=self.slice_shoulders)
+        __segment.add_command(label="Tails", command=self.slice_tails)
+        menu.add_cascade(label="Help", menu=_help)
+        _help.add_command(label="About...", command=self.about)
         self.profiles = []
 
         self.data_folder = os.path.join(str.split(__file__, 'src')[0], 
                            'tests','test_labs', 'test_paulking', 'data')
-
-        self.buttons = []
         self.selector = tk.Frame(selector_frame)
         self.selector.pack(side=tk.TOP, fill="both", expand=True)
         self.selected_profile = tk.IntVar(value=0)
         self.update('__init__')
         self.canvas.draw()
+
+    
+    def _color(self, cmd):
+        assert cmd in ('get', 'next', 'reset')
+        if cmd == 'next':
+            self._color_palette['idx'] += 1
+        elif cmd == 'reset':
+            self._color_palette['idx'] = 0
+        return self._color_palette['val'][self._color_palette['idx']]
 
     def select_active(self, i):
         for J in range(len(self.buttons)):
@@ -189,8 +152,7 @@ class Application(tk.Frame):
         self.buttons[i].config(relief=tk.SUNKEN)
 
     def update(self, msg):
-        selected_profile = self.selected_profile.get()
-        self.color.reset()
+        self._color('reset')
         self.subplot.cla()
         self.buttons = []
         for button in self.selector.winfo_children():
@@ -199,34 +161,29 @@ class Application(tk.Frame):
                                   bg='white', text='Selector')
         selector_title.pack(side="top", fill="both", expand=True)
         for i,profile in enumerate(self.profiles):
-            self.subplot.plot(profile.x, profile.y, color=self.color.get())
+            self.subplot.plot(profile.x, profile.y, color=self._color('get'))
             button = tk.Button(master=self.selector,
-                        bg=self.color.get(), text=str(i), width=10,
+                        bg=self._color('get'), text=str(i), width=8,
                         command=partial(self.select_active, i))
             button.pack(side=tk.TOP, fill='both')
             self.buttons.append(button)
-            self.color.next()
+            self._color('next')
+        try:
+            self.select_active(self.selected_profile.get())
+        except IndexError:
+            pass
         self.status.set(msg)
         self.canvas.draw()
 
-    def file_import_png(self):
+    def from_narrow_png(self):
         filename = askopenfilename(
             initialdir=self.data_folder, title="Film File",
             filetypes=(("Film Files", "*.png"), ("all files", "*.*")))
         self.profiles.append(Profile().from_narrow_png(filename))
-        self.update('file_import_png')
+        self.update('from_narrow_png')
         self.select_active(len(self.profiles)-1)
 
-    def file_import_prs(self):
-        filename = askopenfilename(
-            initialdir=self.data_folder, title="SNC Profiler",
-            filetypes=(("Profiler Files", "*.prs"), ("all files", "*.*")))
-        self.profiles.append(Profile().from_snc_profiler(filename, 'rad'))
-        self.profiles.append(Profile().from_snc_profiler(filename, 'tvs'))
-        self.update('file_import_prs')
-        self.select_active(len(self.profiles)-1)
-
-    def file_import_pulse(self):
+    def from_pulse(self):
         pulse_window = tk.Tk()
         pulse_window.title("Pulse Parameters")
         pulse_window.grid()
@@ -244,12 +201,21 @@ class Application(tk.Frame):
             p = [p[0], p[1], (p[2], p[3]), p[4]]
             self.profiles.append(Profile().from_pulse(*p))
             self.selected_profile.set(len(self.profiles)-1)
-            self.update('file_import_pulse')
+            self.update('from_pulse')
             self.select_active(len(self.profiles)-1)
             pulse_window.destroy()
         ok_button = tk.Button(pulse_window, text="OK", command=OK)
         ok_button.grid(column=0, row=6, columnspan=2)
         pulse_window.mainloop()
+
+    def from_snc_profiler(self):
+        filename = askopenfilename(
+            initialdir=self.data_folder, title="SNC Profiler",
+            filetypes=(("Profiler Files", "*.prs"), ("all files", "*.*")))
+        self.profiles.append(Profile().from_snc_profiler(filename, 'rad'))
+        self.profiles.append(Profile().from_snc_profiler(filename, 'tvs'))
+        self.update('from_snc_profiler')
+        self.select_active(len(self.profiles)-1)
 
     def file_clr(self):
         self.profiles.pop(self.selected_profile.get())
@@ -259,33 +225,123 @@ class Application(tk.Frame):
         self.profiles = []
         self.update('file_clr_all')
     
-    def resample(self, axis):
-        assert axis in ('x','y')
-        step_window = tk.Tk()
-        step_window.title("Step Size")
-        step_window.grid()
-        step = tk.StringVar(step_window, value=0.1)
-        label = tk.Label(step_window, width=10, text="Step size")
-        entry = tk.Entry(step_window, width=10, textvariable=step)
+    def get_edges(self):
+        try:
+            p = self.selected_profile.get()
+            e = self.profiles[p].get_edges()
+            result = "Edges: ( {0:.1f}, {1:.1f})".format(e[0], e[1])
+            self.update(result)
+        except IndexError:
+            pass
+
+    def get_flatness(self):
+        try:
+            p = self.selected_profile.get()
+            e = 100 * self.profiles[p].get_flatness()
+            result = "Flatness: ( {0:.2f}%)".format(e)
+            self.update(result)
+        except IndexError:
+            pass
+
+    def get_increment(self):
+        try:
+            p = self.selected_profile.get()
+            e = self.profiles[p].get_increment()
+            result = "Spacing: {0:.1f} cm".format(e)
+            self.update(result)
+        except IndexError:
+            pass
+
+    def get_symmetry(self):
+        try:
+            p = self.selected_profile.get()
+            e = 100 * self.profiles[p].get_symmetry()
+            result = "Symmetry: ( {0:.2f}%)".format(e)
+            self.update(result)
+        except IndexError:
+            pass
+
+    def get_x(self):
+        win = tk.Tk()
+        win.title("Get Y")
+        win.grid()
+        y = tk.StringVar(win, value=100.0)
+        label = tk.Label(win, width=10, text='y')
+        entry = tk.Entry(win, width=10, textvariable=y)
         label.grid(column=0, row=0, sticky=tk.E)
         entry.grid(column=1, row=0)
         def OK():
             try:
+                v = float(y.get())
                 p = self.selected_profile.get()
-                if axis == 'x':
-                    new_profile = self.profiles[p].resample_x(float(step.get()))
-                if axis == 'y':
-                    new_profile = self.profiles[p].resample_y(float(step.get()))
-                self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
-                self.update('resample_'+axis)
+                result = self.profiles[p].get_x(v)
+                result_string = '('
+                if result:
+                    for r in result:
+                        result_string += '{:.2f}'.format(r) + ', '
+                    result_string = result_string[:-2] + ')'
+                    self.update('x='+ str(v) +'  ->  '+'y='+result_string)
+                else:
+                    self.update('')
             except IndexError:
                 pass
-            step_window.destroy()
-        ok_button = tk.Button(step_window, text="OK", command=OK)
+            win.destroy()
+        ok_button = tk.Button(win, text="OK", command=OK)
         ok_button.grid(column=0, row=10, columnspan=2)
-        step_window.mainloop()
+        win.mainloop()
 
-    def normalise_y(self):
+
+    def get_y(self):
+        win = tk.Tk()
+        win.title("Get X")
+        win.grid()
+        x = tk.StringVar(win, value=0.0)
+        label = tk.Label(win, width=10, text='x')
+        entry = tk.Entry(win, width=10, textvariable=x)
+        label.grid(column=0, row=0, sticky=tk.E)
+        entry.grid(column=1, row=0)
+        def OK():
+            try:
+                v = float(x.get())
+                p = self.selected_profile.get()
+                result = self.profiles[p].get_y(v)
+                if result:
+                    self.update('x='+ str(v) +'  ->  '+'y='+'{:.2f}'.format(result))
+            except IndexError:
+                pass
+            win.destroy()
+        ok_button = tk.Button(win, text="OK", command=OK)
+        ok_button.grid(column=0, row=10, columnspan=2)
+        win.mainloop()
+
+    def make_centered(self):
+        try:
+            p = self.selected_profile.get()
+            new_profile = self.profiles[p].make_centered()
+            self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+            self.update('make_centered')
+        except IndexError:
+            pass
+
+    def make_flipped(self):
+        try:
+            p = self.selected_profile.get()
+            new_profile = self.profiles[p].make_flipped()
+            self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+            self.update('make_flipped')
+        except IndexError:
+            pass
+
+    def make_normal_x(self):
+        try:
+            p = self.selected_profile.get()
+            new_profile = self.profiles[p].make_normal_x()
+            self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+            self.update('normalise_x')
+        except IndexError:
+            pass
+
+    def make_normal_y(self):
         norm_window = tk.Tk()
         norm_window.title("Normalization")
         norm_window.grid()
@@ -304,7 +360,7 @@ class Application(tk.Frame):
                 p = self.selected_profile.get()
                 new_profile = self.profiles[p].make_normal_y(x=float(x.get()),y=float(y.get()))
                 self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
-                self.update('normalise_y')
+                self.update('make_normal_y')
             except IndexError:
                 pass
             norm_window.destroy()
@@ -312,34 +368,73 @@ class Application(tk.Frame):
         ok_button.grid(column=0, row=10, columnspan=2)
         norm_window.mainloop()
 
-    def normalise_x(self):
-        try:
-            p = self.selected_profile.get()
-            new_profile = self.profiles[p].make_normal_x()
-            self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
-            self.update('normalise_y')
-        except IndexError:
-            pass
-
-    def edit_flip(self):
-        try:
-            p = self.selected_profile.get()
-            new_profile = self.profiles[p].make_flipped()
-            self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
-            self.update('edit_flip')
-        except IndexError:
-            pass
-
-
-    def edit_symmetrise(self):
+    def make_symmetric(self):
         try:
             p = self.selected_profile.get()
             new_profile = self.profiles[p].make_symmetric()
             self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
-            self.update('edit_symmetrise')
+            self.update('make_symmetric')
         except IndexError:
             pass
 
+    def resample_x(self):
+        step_window = tk.Tk()
+        step_window.title("Step Size")
+        step_window.grid()
+        step = tk.StringVar(step_window, value=0.1)
+        label = tk.Label(step_window, width=10, text="Step size")
+        entry = tk.Entry(step_window, width=10, textvariable=step)
+        label.grid(column=0, row=0, sticky=tk.E)
+        entry.grid(column=1, row=0)
+        def OK():
+            try:
+                p = self.selected_profile.get()
+                new_profile = self.profiles[p].resample_x(float(step.get()))
+                self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+                self.update('resample_x')
+            except IndexError:
+                pass
+            step_window.destroy()
+        ok_button = tk.Button(step_window, text="OK", command=OK)
+        ok_button.grid(column=0, row=10, columnspan=2)
+        step_window.mainloop()
+
+    def resample_y(self):
+        step_window = tk.Tk()
+        step_window.title("Step Size")
+        step_window.grid()
+        step = tk.StringVar(step_window, value=0.1)
+        label = tk.Label(step_window, width=10, text="Step size")
+        entry = tk.Entry(step_window, width=10, textvariable=step)
+        label.grid(column=0, row=0, sticky=tk.E)
+        entry.grid(column=1, row=0)
+        def OK():
+            try:
+                p = self.selected_profile.get()
+                new_profile = self.profiles[p].resample_y(float(step.get()))
+                self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+                self.update('resample_y')
+            except IndexError:
+                pass
+            step_window.destroy()
+        ok_button = tk.Button(step_window, text="OK", command=OK)
+        ok_button.grid(column=0, row=10, columnspan=2)
+        step_window.mainloop()
+
+    def slice_penumbra(self):
+        pass
+
+    def slice_segment(self):
+        pass
+
+    def slice_shoulders(self):
+        pass
+
+    def slice_tails(self):
+        pass
+
+    def slice_umbra(self):
+        pass
 
     def on_key_press(self, event):
         print("you pressed {}".format(event.key))

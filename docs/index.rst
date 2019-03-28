@@ -1,16 +1,11 @@
-.. dosepro documentation master file, created by
-   sphinx-quickstart on Sat Mar 23 15:11:10 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to dosepro's documentation!
-===================================
+.. include:: ../README.rst
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 1
+    :caption: Items
 
-
+    labs/paulking/profile.rst
+    labs/paulking/gui.rst
 
 Indices and tables
 ==================
