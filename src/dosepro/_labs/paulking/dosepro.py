@@ -68,19 +68,17 @@ class Application(tk.Frame):
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         self.canvas.mpl_connect("key_press_event", self.on_key_press)
 
-        self.status = tk.StringVar() 
+        self.status = tk.StringVar()
         self.status_bar = tk.Frame(master=graph_frame, relief=tk.RIDGE, background="bisque")
         self.status_label=tk.Label(self.status_bar, bd=1, relief=tk.FLAT, anchor=tk.W, 
                                    textvariable=self.status, background="bisque", 
                                    font=('arial',10,'normal'))
         self.status_label.pack(fill=tk.X, expand=True, side=tk.LEFT) 
         self.status_bar.pack(fill=tk.X, expand=False, side=tk.LEFT)
-        self.status.set("__init__")
 
         self._color_palette = {'idx': 0, 'val': dict(enumerate(
             ['red', 'green', 'orange', 'blue', 'yellow', 'purple1', 'grey']*5))}
 
-        # self.menu = Menu(self)
         menu = tk.Menu(root)
         root.config(menu=menu)
         ## ----------
@@ -138,6 +136,7 @@ class Application(tk.Frame):
         self.update('__init__')
         self.canvas.draw()
 
+    
     def _color(self, cmd):
         assert cmd in ('get', 'next', 'reset')
         if cmd == 'next':
@@ -164,7 +163,7 @@ class Application(tk.Frame):
         for i,profile in enumerate(self.profiles):
             self.subplot.plot(profile.x, profile.y, color=self._color('get'))
             button = tk.Button(master=self.selector,
-                        bg=self._color('get'), text=str(i), width=10,
+                        bg=self._color('get'), text=str(i), width=8,
                         command=partial(self.select_active, i))
             button.pack(side=tk.TOP, fill='both')
             self.buttons.append(button)
@@ -225,11 +224,10 @@ class Application(tk.Frame):
     def file_clr_all(self):
         self.profiles = []
         self.update('file_clr_all')
-
+    
     def get_edges(self):
         try:
             p = self.selected_profile.get()
-            print(self.profiles[p].get_edges())
             e = self.profiles[p].get_edges()
             result = "Edges: ( {0:.1f}, {1:.1f})".format(e[0], e[1])
             self.update(result)
@@ -237,7 +235,13 @@ class Application(tk.Frame):
             pass
 
     def get_flatness(self):
-        pass
+        try:
+            p = self.selected_profile.get()
+            e = 100 * self.profiles[p].get_flatness()
+            result = "Flatness: ( {0:.2f}%)".format(e)
+            self.update(result)
+        except IndexError:
+            pass
 
     def get_increment(self):
         try:
@@ -265,7 +269,6 @@ class Application(tk.Frame):
                 v = float(y.get())
                 p = self.selected_profile.get()
                 result = self.profiles[p].get_x(v)
-                print(result)
                 result_string = '('
                 if result:
                     for r in result:
@@ -296,7 +299,6 @@ class Application(tk.Frame):
                 v = float(x.get())
                 p = self.selected_profile.get()
                 result = self.profiles[p].get_y(v)
-                print(result)
                 if result:
                     self.update('x='+ str(v) +'  ->  '+'y='+'{:.2f}'.format(result))
             except IndexError:
@@ -427,7 +429,6 @@ class Application(tk.Frame):
 
     def slice_umbra(self):
         pass
-
 
     def on_key_press(self, event):
         print("you pressed {}".format(event.key))
