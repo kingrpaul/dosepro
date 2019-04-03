@@ -2,6 +2,6 @@
 Profile Class
 =============
 
-.. autoclass:: dosepro._labs.paulking.profile.Profile
+.. autoclass:: profile.Profile
   :members:
   :special-members:

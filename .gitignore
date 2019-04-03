@@ -2,6 +2,7 @@
 config.py
 tempCodeRunnerFile.py
 *.pyc
+*.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

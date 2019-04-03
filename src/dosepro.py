@@ -134,7 +134,9 @@ class Application(tk.Frame):
         self.profiles = []
 
         self.data_folder = os.path.join(str.split(__file__, 'src')[0], 
-                           'tests','test_labs', 'test_paulking', 'data')
+                           'tests','data')
+        # self.data_folder = os.path.join(str.split(__file__, 'src')[0], 
+        #                    'tests','test_labs', 'test_paulking', 'data')
         self.selector = tk.Frame(selector_frame)
         self.selector.pack(side=tk.TOP, fill="both", expand=True)
         self.selected_profile = tk.IntVar(value=0)
