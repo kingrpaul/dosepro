@@ -39,8 +39,11 @@ import matplotlib.image as mpimg
 import PIL
 
 if "dosepro\dosepro" not in __file__:
-    from ...libutils import get_imports
-    IMPORTS = get_imports(globals())
+    try:
+        from ...libutils import get_imports
+        IMPORTS = get_imports(globals())
+    except:
+        pass
 
 NumpyFunction = Callable[[np.ndarray], np.ndarray]
 
