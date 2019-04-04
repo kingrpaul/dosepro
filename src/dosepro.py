@@ -44,7 +44,6 @@ if r"dosepro\dosepro" in __file__:
 else:
     from pymedphys._labs.paulking.profile import Profile
 
-
 class Application(tk.Frame):
     """ Graphical User Interface for Profile Class
     
@@ -135,14 +134,11 @@ class Application(tk.Frame):
 
         self.data_folder = os.path.join(str.split(__file__, 'src')[0], 
                            'tests','data')
-        # self.data_folder = os.path.join(str.split(__file__, 'src')[0], 
-        #                    'tests','test_labs', 'test_paulking', 'data')
         self.selector = tk.Frame(selector_frame)
         self.selector.pack(side=tk.TOP, fill="both", expand=True)
         self.selected_profile = tk.IntVar(value=0)
         self.update('__init__')
         self.canvas.draw()
-
     
     def _color(self, cmd):
         assert cmd in ('get', 'next', 'reset')
@@ -432,7 +428,31 @@ class Application(tk.Frame):
         pass
 
     def slice_segment(self):
-        pass
+        seg_window = tk.Tk()
+        seg_window.title("Slice Segment")
+        seg_window.grid()
+        start = tk.StringVar(seg_window, value=-5.0)
+        stop = tk.StringVar(seg_window, value=5.0)
+        start_label = tk.Label(seg_window, width=10, text="Start")
+        stop_label = tk.Label(seg_window, width=10, text="Stop")        
+        start_entry = tk.Entry(seg_window, width=10, textvariable=start)
+        stop_entry = tk.Entry(seg_window, width=10, textvariable=stop)
+        start_label.grid(column=0, row=0, sticky=tk.E)
+        stop_label.grid(column=0, row=1, sticky=tk.E)
+        start_entry.grid(column=1, row=0)
+        stop_entry.grid(column=1, row=1)
+        def OK():
+            try:
+                p = self.selected_profile.get()
+                new_profile = self.profiles[p].slice_segment(start=float(start.get()),stop=float(stop.get()))
+                self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+                self.update('slice_segment')
+            except IndexError:
+                pass
+            seg_window.destroy()
+        ok_button = tk.Button(seg_window, text="OK", command=OK)
+        ok_button.grid(column=0, row=10, columnspan=2)
+        seg_window.mainloop()
 
     def slice_shoulders(self):
         pass
