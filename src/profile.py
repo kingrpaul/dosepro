@@ -636,16 +636,18 @@ class Profile():
 
         not_umbra = {'lt': self.slice_segment(stop=self.slice_umbra().x[0]),
                      'rt': self.slice_segment(start=self.slice_umbra().x[-1])}
-
-        lt_80pct = not_umbra['lt'].get_x(0.8 * not_umbra['lt'].y[-1])[-1]
-        lt_20pct = not_umbra['lt'].get_x(0.2 * not_umbra['lt'].y[-1])[-1]
-        lt_penum = self.slice_segment(start=lt_20pct, stop=lt_80pct)
-
-        rt_80pct = not_umbra['rt'].get_x(0.8 * not_umbra['rt'].y[0])[-1]
-        rt_20pct = not_umbra['rt'].get_x(0.2 * not_umbra['rt'].y[0])[-1]
-        rt_penum = self.slice_segment(start=rt_80pct, stop=rt_20pct)
-
-        return (lt_penum, rt_penum)
+        result = []
+        for side in not_umbra:
+            min_val = min(not_umbra[side].y)
+            max_val = max(not_umbra[side].y)
+            incr_val = 0.2 * (max_val - min_val)
+            lo_x = not_umbra[side].get_x(min_val + incr_val)
+            hi_x = not_umbra[side].get_x(max_val - incr_val)
+            coords = [lo_x, hi_x]
+            coords.sort()
+            penum = not_umbra[side].slice_segment(start=coords[0], stop=coords[1])
+            result.append(penum)
+        return tuple(result)
 
     def slice_shoulders(self):
         """ shoulders (penumbra -> umbra, umbra -> penumbra)

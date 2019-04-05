@@ -425,7 +425,12 @@ class Application(tk.Frame):
         step_window.mainloop()
 
     def slice_penumbra(self):
-        pass
+        p = self.selected_profile.get()
+        (new_profile1,new_profile2) = self.profiles[p].slice_penumbra()
+        print(new_profile1)
+        print(new_profile2)
+        self.profiles = self.profiles[:p] + [new_profile1, new_profile2] + self.profiles[(p+2):]
+        self.update('slice_penumbra')
 
     def slice_segment(self):
         seg_window = tk.Tk()

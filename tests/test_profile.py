@@ -31,12 +31,14 @@ import sys
 # from pymedphys._labs.paulking.profile import Profile
 
 if "dosepro\dosepro" in __file__:
-    add_path = os.path.abspath(os.path.join(__file__, '..','..','..','..'))
-    add_path = os.path.join(add_path, 'src', 'dosepro', '_labs', 'paulking')
+    add_path = os.path.abspath(os.path.join(__file__, '..','..'))
+    add_path = os.path.join(add_path, 'src')
     sys.path.insert(0,add_path)
     from profile import Profile
 else:
     from pymedphys._labs.paulking.profile import Profile
+
+
 
 # pylint: disable = E1102, C0111
 
@@ -326,8 +328,8 @@ if __name__ == "__main__":
     test_make_normal_x()
     test_slice_umbra()
     test_slice_penumbra()
-    test_slice_shoulders()
-    test_slice_tails()
+    # test_slice_shoulders()
+    # test_slice_tails()
     test_get_flatness()
     test_get_symmetry()
     test_make_symmetric()
