@@ -124,7 +124,7 @@ class Application(tk.Frame):
         _get.add_command(label="Symmetry", command=self.get_symmetry)
         _get.add_cascade(label='Segment ...', menu=__segment)
         __segment.add_command(label="Defined", command=self.slice_segment)
-        __segment.add_command(label="Umbra", command=self.slice_segment)
+        __segment.add_command(label="Umbra", command=self.slice_umbra)
         __segment.add_command(label="Penumbra", command=self.slice_penumbra)
         __segment.add_command(label="Shoulders", command=self.slice_shoulders)
         __segment.add_command(label="Tails", command=self.slice_tails)
@@ -461,7 +461,10 @@ class Application(tk.Frame):
         pass
 
     def slice_umbra(self):
-        pass
+        p = self.selected_profile.get()
+        new_profile = self.profiles[p].slice_umbra()
+        self.profiles = self.profiles[:p] + [new_profile] + self.profiles[(p+1):]
+        self.update('slice_umbra')
 
     def on_key_press(self, event):
         print("you pressed {}".format(event.key))
