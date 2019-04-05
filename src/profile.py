@@ -663,11 +663,11 @@ class Profile():
 
         """
 
-        lt_start = self.slice_penumbra()[0].x[0]
+        lt_start = self.slice_penumbra()[0].x[-1]
         lt_stop = self.slice_umbra().x[0]
 
         rt_start = self.slice_umbra().x[-1]
-        rt_stop = self.slice_penumbra()[-1].x[-1]
+        rt_stop = self.slice_penumbra()[-1].x[0]
 
         lt_should = self.slice_segment(start=lt_start, stop=lt_stop)
         rt_should = self.slice_segment(start=rt_start, stop=rt_stop)

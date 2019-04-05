@@ -427,8 +427,6 @@ class Application(tk.Frame):
     def slice_penumbra(self):
         p = self.selected_profile.get()
         (new_profile1,new_profile2) = self.profiles[p].slice_penumbra()
-        print(new_profile1)
-        print(new_profile2)
         self.profiles = self.profiles[:p] + [new_profile1, new_profile2] + self.profiles[(p+2):]
         self.update('slice_penumbra')
 
@@ -460,7 +458,10 @@ class Application(tk.Frame):
         seg_window.mainloop()
 
     def slice_shoulders(self):
-        pass
+        p = self.selected_profile.get()
+        (new_profile1,new_profile2) = self.profiles[p].slice_shoulders()
+        self.profiles = self.profiles[:p] + [new_profile1, new_profile2] + self.profiles[(p+2):]
+        self.update('slice_shoulders')
 
     def slice_tails(self):
         pass
