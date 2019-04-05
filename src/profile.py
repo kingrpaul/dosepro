@@ -39,17 +39,11 @@ import matplotlib.image as mpimg
 import PIL
 
 try:
+    assert "dosepro" not in __file__
     from ...libutils import get_imports
     IMPORTS = get_imports(globals())
-except ImportError:  ## when r"dosepro\dosepro" in __file__
+except (ImportError, AssertionError):
     pass
-
-# if r"dosepro\dosepro" not in __file__:
-#     try:
-#         from ...libutils import get_imports
-#         IMPORTS = get_imports(globals())
-#     except:
-#         pass
 
 NumpyFunction = Callable[[np.ndarray], np.ndarray]
 
@@ -662,12 +656,17 @@ class Profile():
             (left shoulder Profile, right shoulder Profile)
 
         """
-
-        lt_start = self.slice_penumbra()[0].x[-1]
+        try:
+            lt_start = self.slice_penumbra()[0].x[-1]
+        except IndexError:
+            lt_start = self.slice_umbra().x[-1]
         lt_stop = self.slice_umbra().x[0]
 
         rt_start = self.slice_umbra().x[-1]
-        rt_stop = self.slice_penumbra()[-1].x[0]
+        try:
+            rt_stop = self.slice_penumbra()[-1].x[0]
+        except IndexError:
+            rt_stop = self.slice_umbra().x[0]
 
         lt_should = self.slice_segment(start=lt_start, stop=lt_stop)
         rt_should = self.slice_segment(start=rt_start, stop=rt_stop)
@@ -687,9 +686,15 @@ class Profile():
 
         """
         lt_start = self.x[0]
-        lt_stop = self.slice_penumbra()[0].x[0]
+        try:
+            lt_stop = self.slice_penumbra()[0].x[0]
+        except IndexError:
+            lt_stop = self.slice_shoulders()[0].x[0]
 
-        rt_start = self.slice_penumbra()[-1].x[-1]
+        try:
+            rt_start = self.slice_penumbra()[-1].x[-1]
+        except IndexError:
+            rt_start = self.slice_shoulders()[-1].x[-1]
         rt_stop = self.x[-1]
 
         lt_tail = self.slice_segment(start=lt_start, stop=lt_stop)

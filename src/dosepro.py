@@ -464,7 +464,10 @@ class Application(tk.Frame):
         self.update('slice_shoulders')
 
     def slice_tails(self):
-        pass
+        p = self.selected_profile.get()
+        (new_profile1,new_profile2) = self.profiles[p].slice_tails()
+        self.profiles = self.profiles[:p] + [new_profile1, new_profile2] + self.profiles[(p+2):]
+        self.update('slice_tails')
 
     def slice_umbra(self):
         p = self.selected_profile.get()
