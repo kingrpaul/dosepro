@@ -30,7 +30,7 @@ import sys
 
 # from pymedphys._labs.paulking.profile import Profile
 
-if "dosepro\dosepro" in __file__:
+if "python" not in __file__:
     add_path = os.path.abspath(os.path.join(__file__, '..','..'))
     add_path = os.path.join(add_path, 'src')
     sys.path.insert(0,add_path)
