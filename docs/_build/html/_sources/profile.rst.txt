@@ -1,7 +1,0 @@
-=============
-Profile Class
-=============
-
-.. autoclass:: profile.Profile
-  :members:
-  :special-members:
