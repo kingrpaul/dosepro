@@ -28,11 +28,7 @@ import os
 import numpy as np
 import sys
 
-# add_path = os.path.abspath(os.path.join(__file__, '..', '..'))
-# add_path = os.path.join(add_path, 'src')
-# sys.path.insert(0, add_path)
 from prof_funct import Profile
-
 
 # pylint: disable = E1102, C0111
 

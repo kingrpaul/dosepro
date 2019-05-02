@@ -113,6 +113,7 @@ class GUI(tk.Frame):
         __from.add_command(label="Film", command=self.from_narrow_png)
         __from.add_command(label="Pulse", command=self.from_pulse)
         __from.add_command(label="Profiler", command=self.from_snc_profiler)
+        __from.add_command(label="X-Calib", command=self.from_cross_calibration)
         _file.add_command(label="Clear Selected", command=self.file_clr)
         _file.add_command(label="Clear All", command=self.file_clr_all)
         _file.add_command(label="Exit", command=self._quit)
@@ -230,6 +231,18 @@ class GUI(tk.Frame):
         self.profiles.append(Profile().from_snc_profiler(filename, 'rad'))
         self.profiles.append(Profile().from_snc_profiler(filename, 'tvs'))
         self.update('from_snc_profiler')
+        self.select_active(len(self.profiles)-1)
+
+    def from_cross_calibration(self):
+        profiler_filename = askopenfilename(
+            initialdir=self.data_folder, title="SNC Profiler",
+            filetypes=(("Profiler Files", "*.prs"), ("all files", "*.*")))
+        film_filename = askopenfilename(
+            initialdir=self.data_folder, title="Film File",
+            filetypes=(("Film Files", "*.png"), ("all files", "*.*")))
+
+        self.profiles.append(Profile().cross_calibrate(profiler_filename,film_filename))
+        self.update('from_cross_calibration')
         self.select_active(len(self.profiles)-1)
 
     def file_clr(self):

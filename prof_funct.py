@@ -321,7 +321,7 @@ class Profile():
 
         """
         image_file = PIL.Image.open(file_name)
-        assert image_file.mode == 'RGB'
+        # assert image_file.mode == 'RGB'
         dpi_horiz, dpi_vert = image_file.info['dpi']
 
         image_array = mpimg.imread(file_name)
