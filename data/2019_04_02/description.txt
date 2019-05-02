@@ -1,0 +1,5 @@
+GafChromic EBT2 
+d=5cm SAD=100cm
+4X
+60 degree wedge Y1
+5x20cm
