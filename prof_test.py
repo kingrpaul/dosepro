@@ -158,6 +158,14 @@ def test_from_raystation_line():
     assert np.isclose(max(ray.x), ray.x[-1])
     assert np.isclose(max(ray.y), 0.41)
 
+def test_from_rfa_ascii():
+    file_name = os.path.join(DATA_DIR, '2018_02_01 RFA300 ASCII Measurement.asc')
+    rfa = Profile().from_rfa_ascii(file_name)
+    assert len(rfa)==2
+    print(np.isclose(rfa[0].x[0], -11.2))
+
+    ##############
+
 def test_get_y():
     profiler = Profile().from_tuples(PROFILER)
     assert np.isclose(profiler.get_y(0), 45.23)
@@ -307,7 +315,8 @@ if __name__ == "__main__":
     test_from_pulse()
     test_from_snc_profiler()
     test_from_narrow_png()
-    test_from_raystation_line() ######
+    test_from_raystation_line()
+    test_from_rfa_ascii() ######
     test_get_y()
     test_get_x()
     test_get_increment()

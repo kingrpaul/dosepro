@@ -47,13 +47,7 @@ from matplotlib.figure import Figure
 from functools import partial
 import PIL
 
-
-# add_path = os.path.abspath(os.path.join(__file__, '..','..','..','..'))
-# add_path = os.path.join(add_path, 'src', 'dosepro', '_labs', 'paulking')
-# sys.path.insert(0,add_path)
 from prof_funct import Profile
-
-NumpyFunction = Callable[[np.ndarray], np.ndarray]
 
 # pylint: disable = C0103, C0121, W0102
 
@@ -114,6 +108,7 @@ class GUI(tk.Frame):
         __from.add_command(label="Pulse", command=self.from_pulse)
         __from.add_command(label="Profiler", command=self.from_snc_profiler)
         __from.add_command(label="RayStation Line", command=self.from_raystation_line)
+        __from.add_command(label="RFA ASCII", command=self.from_rfa_ascii)
         __from.add_command(label="X-Calib", command=self.from_cross_calibration)
         _file.add_command(label="Clear Selected", command=self.file_clr)
         _file.add_command(label="Clear All", command=self.file_clr_all)
@@ -241,6 +236,17 @@ class GUI(tk.Frame):
         self.profiles.append(Profile().from_raystation_line(filename))
         self.update('from_raystation_line')
         self.select_active(len(self.profiles)-1)
+
+    def from_rfa_ascii(self):
+        filename = askopenfilename(
+            initialdir=self.data_folder, title="RFA File",
+            filetypes=(("ASC Files", "*.asc"), ("all files", "*.*")))
+        for profile in Profile().from_rfa_ascii(filename):
+            print(profile)
+            self.profiles.append(profile)
+            self.update('from_rfa_ascii')
+        self.select_active(len(self.profiles)-1)
+
 
 
     def from_cross_calibration(self):
