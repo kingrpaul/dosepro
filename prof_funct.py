@@ -364,7 +364,7 @@ class Profile():
         zipped_profile = list(zip(downsampled_distances, downsampled_density))
         return Profile().from_tuples(zipped_profile)
 
-    ##############################
+    
     def from_raystation_line(self, file_name):
         """ import from raystation plan csv file
 
@@ -382,8 +382,6 @@ class Profile():
         meta = dict()
         with open(file_name) as ray_file:
             contents = ''.join(ray_file)
-
-
         for key in ('RayStationVersion', 'PatientName', 'PatientId', 
                     'CoordinateSystem','LineName', 'DoseName', 
                     'DoseEngine', 'TreatmentMachine'):
@@ -400,7 +398,60 @@ class Profile():
         distance = distance - distance[len(distance)//2]
         dose = data[:,3]
         return Profile(x=distance, y=dose, meta=meta)
-    #######################
+
+    def from_rfa_ascii(self, file_name):
+        """ import from rfa scan csv file
+
+        Source file is as produced by Omnipro Accept.
+        
+        Parameters
+        ----------
+        file_name : str
+
+        Returns
+        -------
+        Profile
+
+        """
+
+        result = []
+
+        with open(file_name) as rfa_file:
+            contents = ''.join(rfa_file)
+
+        num_measurments = int(re.search(r':MSR\W+(\d+)', contents).group(1))
+
+        contents = contents.split(':EOM #')[:-1]
+
+        for idx, measurement in enumerate(contents):
+            meta = dict()
+            for key in ( ('%DAT', 'date'), ('%TIM', 'time'), ('%SSD', 'SSD'), 
+                        ('%WEG', 'wedge'), ('%PTS', 'num_pts')):
+                regex = key[0] + r'\W+(.{1,})\n'
+                meta[key[1]] = re.search(regex, measurement).group(1)
+
+            key = (r'%FSZ', 'field_size')
+            regex = key[0] + r'\W+(.+)\t(.+)\n'
+            meta[key[1]] = (re.search(regex, measurement).group(1), 
+                            re.search(regex, measurement).group(2))
+
+            for key in (('%STS', 'start_pt'), (r'%EDS', 'end_pt')):
+                regex = key[0] + r'\W+(.+)\t(.+)\t(.+) #'
+                meta[key[1]] = (re.search(regex, measurement).group(1).strip(),
+                                re.search(regex, measurement).group(2).strip(),
+                                re.search(regex, measurement).group(3).strip())
+
+            data = np.array([(m.split('\t')[-1]).split() for m in measurement.split('\n') if '=' in m])
+            data = data.astype(float)
+            distance = (  (data[:,0] - data[0,0]  )**2 + 
+                        (data[:,1] - data[0,1]  )**2 + 
+                        (data[:,2] - data[0,2]  )**2)**0.5 / 10
+            distance = distance - distance[len(distance)//2]
+
+            dose = data[:,3]
+            result.append(Profile(x=distance, y=dose, meta=meta))
+        # print(result)
+        return result
 
 
     def get_y(self, x):
