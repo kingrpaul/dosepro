@@ -46,6 +46,8 @@ from matplotlib.figure import Figure
 
 from functools import partial
 import PIL
+import csv
+import re
 
 add_path = os.path.abspath(os.path.join(__file__, '..','..','..','..'))
 add_path = os.path.join(add_path, 'src', 'dosepro', '_labs', 'paulking')
@@ -361,6 +363,45 @@ class Profile():
 
         zipped_profile = list(zip(downsampled_distances, downsampled_density))
         return Profile().from_tuples(zipped_profile)
+
+    ##############################
+    def from_raystation_line(self, file_name):
+        """ import from raystation plan csv file
+
+        Source file is a line-dose distribution created by RayStation-6.
+        
+        Parameters
+        ----------
+        file_name : str
+
+        Returns
+        -------
+        Profile
+
+        """
+        meta = dict()
+        with open(file_name) as ray_file:
+            contents = ''.join(ray_file)
+
+
+        for key in ('RayStationVersion', 'PatientName', 'PatientId', 
+                    'CoordinateSystem','LineName', 'DoseName', 
+                    'DoseEngine', 'TreatmentMachine'):
+            regex = key + r':\W+(.{1,})\n'
+            meta[key] = re.search(regex, contents).group(1)
+
+        data = contents.split('#X [cm];Y [cm];Z [cm];Dose [cGy]')[-1]
+        data = data.split('##')[0].split('\n')[1:-1]
+        data = csv.reader(data, delimiter=';')
+        data = np.array(list(data)).astype(float)
+        distance = (  (data[:,0] - data[0,0]  )**2 + 
+                      (data[:,1] - data[0,1]  )**2 + 
+                      (data[:,2] - data[0,2]  )**2)**0.5
+        distance = distance - distance[len(distance)//2]
+        dose = data[:,3]
+        return Profile(x=distance, y=dose, meta=meta)
+    #######################
+
 
     def get_y(self, x):
         """ y-value at distance x

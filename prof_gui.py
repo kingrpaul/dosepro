@@ -113,6 +113,7 @@ class GUI(tk.Frame):
         __from.add_command(label="Film", command=self.from_narrow_png)
         __from.add_command(label="Pulse", command=self.from_pulse)
         __from.add_command(label="Profiler", command=self.from_snc_profiler)
+        __from.add_command(label="RayStation Line", command=self.from_raystation_line)
         __from.add_command(label="X-Calib", command=self.from_cross_calibration)
         _file.add_command(label="Clear Selected", command=self.file_clr)
         _file.add_command(label="Clear All", command=self.file_clr_all)
@@ -233,6 +234,15 @@ class GUI(tk.Frame):
         self.update('from_snc_profiler')
         self.select_active(len(self.profiles)-1)
 
+    def from_raystation_line(self):
+        filename = askopenfilename(
+            initialdir=self.data_folder, title="Film File",
+            filetypes=(("CSV Files", "*.csv"), ("all files", "*.*")))
+        self.profiles.append(Profile().from_raystation_line(filename))
+        self.update('from_raystation_line')
+        self.select_active(len(self.profiles)-1)
+
+
     def from_cross_calibration(self):
         profiler_filename = askopenfilename(
             initialdir=self.data_folder, title="SNC Profiler",
@@ -248,6 +258,7 @@ class GUI(tk.Frame):
     def file_clr(self):
         self.profiles.pop(self.selected_profile.get())
         self.update('file_clr')
+        self.select_active(len(self.profiles)-1)
 
     def file_clr_all(self):
         self.profiles = []

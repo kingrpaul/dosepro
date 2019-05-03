@@ -73,10 +73,11 @@ WEDGED = [(-16.4, 0.27), (-16, 0.31), (-15.6, 0.29), (-15.2, 0.29),
           (14.4, 0.4), (14.8, 0.35), (15.2, 0.33), (15.6, 0.32),
           (16, 0.31), (16.4, 0.3)]
 
+DATA_DIR = (os.path.abspath(os.path.join(os.path.dirname(__file__), 'data')))
+assert os.path.isdir(DATA_DIR)
 
 def test_init():
     assert np.allclose(Profile(x=np.array([0]), y=np.array([0])).x, [0])
-
 
 def test_interp():
     assert Profile().interp is None
@@ -137,9 +138,7 @@ def test_from_pulse():
 
 
 def test_from_snc_profiler():
-    data_directory = os.path.abspath(os.path.dirname(__file__))
-    data_directory = os.path.join(data_directory, 'data')
-    file_name = os.path.join(data_directory, 'test_varian_open.prs')
+    file_name = os.path.join(DATA_DIR, '2018_12_03 clinac 10x10 open.prs')
     x_profile = Profile().from_snc_profiler(file_name, 'tvs')
     y_profile = Profile().from_snc_profiler(file_name, 'rad')
     assert np.isclose(x_profile.get_y(0), 45.50562901780488)
@@ -148,12 +147,16 @@ def test_from_snc_profiler():
 
 
 def test_from_narrow_png():
-    data_directory = os.path.abspath(os.path.dirname(__file__))
-    data_directory = os.path.join(data_directory, 'data')
-    file_name = os.path.join(data_directory, 'FilmCalib_EBT_vert_strip.png')
+    file_name = os.path.join(DATA_DIR, '2017_12_04 FilmCalib_EBT_vert_strip.png')
     png = Profile().from_narrow_png(file_name)
     assert np.isclose(png.get_y(0), 0.609074819347117)
 
+def test_from_raystation_line():
+    file_name = os.path.join(DATA_DIR, '2018_02_08_raystation_line_dose.csv')
+    ray = Profile().from_raystation_line(file_name)
+    assert np.isclose(min(ray.x), ray.x[0])
+    assert np.isclose(max(ray.x), ray.x[-1])
+    assert np.isclose(max(ray.y), 0.41)
 
 def test_get_y():
     profiler = Profile().from_tuples(PROFILER)
@@ -287,11 +290,8 @@ def test_align_to():
 
 
 def test_cross_calibrate():
-    data_directory = os.path.abspath(os.path.dirname(__file__))
-    data_directory = os.path.join(data_directory, 'data')
-    reference_file_name = os.path.join(data_directory, 'FilmCalib.prs')
-    measured_file_name = os.path.join(
-        data_directory, 'FilmCalib_EBT_vert_strip.png')
+    reference_file_name = os.path.join(DATA_DIR, '2017_12_04 FilmCalib.prs')
+    measured_file_name = os.path.join(DATA_DIR, '2017_12_04 FilmCalib_EBT_vert_strip.png')
     cal_curve = Profile().cross_calibrate(
         reference_file_name, measured_file_name)
     assert min(cal_curve.x) <= 1
@@ -307,6 +307,7 @@ if __name__ == "__main__":
     test_from_pulse()
     test_from_snc_profiler()
     test_from_narrow_png()
+    test_from_raystation_line() ######
     test_get_y()
     test_get_x()
     test_get_increment()
