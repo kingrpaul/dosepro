@@ -450,8 +450,62 @@ class Profile():
 
             dose = data[:,3]
             result.append(Profile(x=distance, y=dose, meta=meta))
-        # print(result)
         return result
+
+    def from_pinnacle_ascii(self, file_name):
+        """ import from pinnacle full ASCII file
+
+        Source file is as produced by Pinnacle TPS.
+        
+        Parameters
+        ----------
+        file_name : str
+
+        Returns
+        -------
+        Profile
+
+        """
+
+        with open(file_name) as pinn_file:
+            contents = ''.join(pinn_file)
+
+        regex = re.compile(r"""PinnDoseProfile\n(\d+) (\d+)\n""")
+        energy, ssd = regex.match(contents).group(1,2)
+
+        regex = re.compile(r"""\w{15}\n\d+ \d+\n(\d+) (\d+) (\d+) (\d+)""")
+        jaws = regex.match(contents).group(1,2,3,4)
+
+        regex = re.compile(r"""\w{15}(\s+|\d)+WedgeName  "(.+)"\n""")
+        wedge = regex.match(contents).group(2)
+
+        regex = re.compile(r"""\w{15}(\s+|\d)+WedgeName  ".+"\n(\d+)""")
+        num_profiles = int(regex.match(contents).group(2))
+        assert num_profiles == \
+            len(re.findall('(DepthDose|XProfile|YProfile)', contents))
+
+        regex = re.compile(r'DepthDose|XProfile|YProfile\s(-?\d+\.\d+)\s(-?\d+\.\d+)\n(\d+)')
+        depths, offsets, num_points = tuple(zip(*re.findall(regex, contents)))
+
+        regex = re.compile(r'DepthDose|XProfile|YProfile\s-?\d+\.\d+\s-?\d+\.\d+\n\d+')
+        contents = re.sub(regex, '**break-point**', contents)
+        contents = contents.split('**break-point**')[1:]
+
+        result = []
+        for i,_ in enumerate(contents):
+            meta = {'energy': energy, 'ssd': ssd,'jaws': jaws, 'wedge': wedge,
+                    'depth': depths[i],'offset': offsets[i], 
+                    'num_points': num_points[i]}
+            data = np.array([c.split() for c in contents[i].split('\n') if len(c.split())==2]).astype(float)
+            x = data[:,0]
+            y = data[:,1]
+            result.append(Profile(x=x, y=y, meta=meta))
+
+        return result
+
+        #################
+
+
 
 
     def get_y(self, x):

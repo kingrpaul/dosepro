@@ -247,8 +247,6 @@ class GUI(tk.Frame):
             self.update('from_rfa_ascii')
         self.select_active(len(self.profiles)-1)
 
-
-
     def from_cross_calibration(self):
         profiler_filename = askopenfilename(
             initialdir=self.data_folder, title="SNC Profiler",
