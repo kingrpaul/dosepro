@@ -109,6 +109,7 @@ class GUI(tk.Frame):
         __from.add_command(label="Profiler", command=self.from_snc_profiler)
         __from.add_command(label="RayStation Line", command=self.from_raystation_line)
         __from.add_command(label="RFA ASCII", command=self.from_rfa_ascii)
+        __from.add_command(label="Pinnacle ASCII", command=self.from_pinnacle_ascii)
         __from.add_command(label="X-Calib", command=self.from_cross_calibration)
         _file.add_command(label="Clear Selected", command=self.file_clr)
         _file.add_command(label="Clear All", command=self.file_clr_all)
@@ -242,9 +243,17 @@ class GUI(tk.Frame):
             initialdir=self.data_folder, title="RFA File",
             filetypes=(("ASC Files", "*.asc"), ("all files", "*.*")))
         for profile in Profile().from_rfa_ascii(filename):
-            print(profile)
             self.profiles.append(profile)
             self.update('from_rfa_ascii')
+        self.select_active(len(self.profiles)-1)
+
+    def from_pinnacle_ascii(self):
+        filename = askopenfilename(
+            initialdir=self.data_folder, title="DAT File",
+            filetypes=(("Pinnacle Files", "*.dat"), ("all files", "*.*")))
+        for profile in Profile().from_pinnacle_ascii(filename):
+            self.profiles.append(profile)
+            self.update('from_pinnacle_ascii')
         self.select_active(len(self.profiles)-1)
 
     def from_cross_calibration(self):

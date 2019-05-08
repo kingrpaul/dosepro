@@ -175,16 +175,13 @@ def test_get_y():
     profiler = Profile().from_tuples(PROFILER)
     assert np.isclose(profiler.get_y(0), 45.23)
 
-
 def test_get_x():
     profiler = Profile().from_tuples(PROFILER)
     assert np.allclose(profiler.get_x(10), (-5.17742830712, 5.1740693196))
 
-
 def test_get_increment():
     profiler = Profile().from_tuples(PROFILER)
     assert np.isclose(profiler.get_increment(), 0.4)
-
 
 def test_slice_segment():
     profiler = Profile().from_tuples(PROFILER)

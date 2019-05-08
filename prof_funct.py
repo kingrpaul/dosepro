@@ -470,42 +470,40 @@ class Profile():
         with open(file_name) as pinn_file:
             contents = ''.join(pinn_file)
 
-        regex = re.compile(r"""PinnDoseProfile\n(\d+) (\d+)\n""")
-        energy, ssd = regex.match(contents).group(1,2)
+        row1 = r'(\w{15})\n'
+        assert 'PinnDoseProfile' in re.match(row1, contents).group(1)
 
-        regex = re.compile(r"""\w{15}\n\d+ \d+\n(\d+) (\d+) (\d+) (\d+)""")
-        jaws = regex.match(contents).group(1,2,3,4)
+        row2 = row1 + r'(\d+)\s(\d+\.?\d*)\n'
+        energy, ssd = re.match(row2, contents).group(2,3)
 
-        regex = re.compile(r"""\w{15}(\s+|\d)+WedgeName  "(.+)"\n""")
-        wedge = regex.match(contents).group(2)
+        row3 = row2 + r'(\d+\.?\d*)\s(\d+\.?\d*)\s(\d+\.?\d*)\s(\d+\.?\d*)\n'
+        jaws = re.match(row3, contents).group(4,5,6,7)
+       
+        row4 = row3 + r'WedgeName\s+"(.+)"\n'
+        wedge = re.match(row4, contents).group(8)
 
-        regex = re.compile(r"""\w{15}(\s+|\d)+WedgeName  ".+"\n(\d+)""")
-        num_profiles = int(regex.match(contents).group(2))
-        assert num_profiles == \
-            len(re.findall('(DepthDose|XProfile|YProfile)', contents))
+        row5 = row4 + r'(\d+)\n'
+        num_profiles = re.match(row5, contents).group(9)
+        assert int(num_profiles) == len(re.findall('(^De|XP|YP)', contents))
 
-        regex = re.compile(r'DepthDose|XProfile|YProfile\s(-?\d+\.\d+)\s(-?\d+\.\d+)\n(\d+)')
-        depths, offsets, num_points = tuple(zip(*re.findall(regex, contents)))
+        hdr = r'(De.+|XP.+|YP.+)\s(-?\d+\.\d+)\s(-?\d+\.\d+)\n(\d+)'
+        p_type, dpth, offset, num_pt = tuple(zip(*re.findall(hdr, contents)))
 
-        regex = re.compile(r'DepthDose|XProfile|YProfile\s-?\d+\.\d+\s-?\d+\.\d+\n\d+')
-        contents = re.sub(regex, '**break-point**', contents)
-        contents = contents.split('**break-point**')[1:]
+        regex = re.compile(r'De.+|XP.+|YP.+\s-?\d+\.\d+')
+        contents = re.sub(regex, '*break*', contents).split('*break*')[1:]
 
         result = []
-        for i,_ in enumerate(contents):
-            meta = {'energy': energy, 'ssd': ssd,'jaws': jaws, 'wedge': wedge,
-                    'depth': depths[i],'offset': offsets[i], 
-                    'num_points': num_points[i]}
-            data = np.array([c.split() for c in contents[i].split('\n') if len(c.split())==2]).astype(float)
+        for i in range(int(num_profiles)):
+            meta = {'type': p_type[i],'energy': energy, 'ssd': ssd, 'jaws': jaws, 
+                    'wedge': wedge, 'depth': dpth[i],'offset': offset[i], 
+                    'num_points': num_pt[i]}
+            data = np.array([c.split() for c in contents[i].split('\n') 
+                             if len(c.split())==2]).astype(float)
             x = data[:,0]
             y = data[:,1]
             result.append(Profile(x=x, y=y, meta=meta))
 
         return result
-
-        #################
-
-
 
 
     def get_y(self, x):
