@@ -162,24 +162,26 @@ def test_from_rfa_ascii():
     file_name = os.path.join(DATA_DIR, '2018_02_01 RFA300 ASCII Measurement.asc')
     rfa = Profile().from_rfa_ascii(file_name)
     assert len(rfa)==2
-    print(np.isclose(rfa[0].x[0], -11.2))
+    assert np.isclose(rfa[0].x[0], -11.2)
 
-    ##############
+def test_from_pinnacle_ascii():
+    file_name = os.path.join(DATA_DIR, '2007_11_20 - Pinnacle ASCII 40x40.dat')
+    pinn = Profile().from_pinnacle_ascii(file_name)
+    assert type(pinn) == list
+    assert len(pinn) == 5
+    assert np.isclose(pinn[0].x[0], -24)
 
 def test_get_y():
     profiler = Profile().from_tuples(PROFILER)
     assert np.isclose(profiler.get_y(0), 45.23)
 
-
 def test_get_x():
     profiler = Profile().from_tuples(PROFILER)
     assert np.allclose(profiler.get_x(10), (-5.17742830712, 5.1740693196))
 
-
 def test_get_increment():
     profiler = Profile().from_tuples(PROFILER)
     assert np.isclose(profiler.get_increment(), 0.4)
-
 
 def test_slice_segment():
     profiler = Profile().from_tuples(PROFILER)
@@ -316,7 +318,8 @@ if __name__ == "__main__":
     test_from_snc_profiler()
     test_from_narrow_png()
     test_from_raystation_line()
-    test_from_rfa_ascii() ######
+    test_from_rfa_ascii()
+    test_from_pinnacle_ascii() ######
     test_get_y()
     test_get_x()
     test_get_increment()
