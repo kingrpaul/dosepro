@@ -506,6 +506,27 @@ class Profile():
         return result
 
 
+    # def get_y(self, x):
+    #     """ y-value at distance x
+
+    #     Return a y value based on interpolation of source data for a
+    #     supplied distance.
+
+    #     Parameters
+    #     ----------
+    #     x : float
+
+    #     Returns
+    #     -------
+    #     float
+
+    #     """
+    #     try:
+    #         return self.interp(x)
+    #     except ValueError:
+    #         return np.nan
+
+
     def get_y(self, x):
         """ y-value at distance x
 
@@ -521,10 +542,34 @@ class Profile():
         float
 
         """
-        try:
-            return self.interp(x)
-        except ValueError:
-            return np.nan
+        # print(x)
+        t = np.array([a for a in list(x)])
+        # print(t)
+        n = np.array(range(len(self.y)))
+        # print(n)
+        x_n = self.y
+        # print(x_n)
+        T = np.average(np.diff(self.x))
+        # print(T)
+        result = []
+        for i,t_ in enumerate(t):
+            # print(t_)
+            running_total = 0
+            for j in range(len(n)):
+                # print(j)
+                running_total += x_n[j] * np.sinc((t_-n[j]*T)/T)
+            result.append(running_total)
+        return np.array(result)
+
+
+        # print(np.sum(x_n))
+
+        # try:
+        #     return self.interp(x)
+        # except ValueError:
+        #     return np.nan
+
+
 
     def get_x(self, y):
         """ tuple of x-values at intensity y
@@ -614,7 +659,29 @@ class Profile():
 
         return Profile(new_x, new_y)
 
-    def resample_x(self, step):
+    # def resample_x(self, step):
+    #     """ resampled x-values at a given increment
+
+    #     Resulting profile has stepsize of the indicated step based on
+    #     linear interpolation over the points of the source profile.
+
+    #     Parameters
+    #     ----------
+    #     step : float
+    #         sampling increment
+
+    #     Returns
+    #     -------
+    #     Profile
+
+    #     """
+
+    #     new_x = np.arange(self.x[0], self.x[-1], step)
+    #     new_y = self.interp(new_x)
+    #     return Profile(new_x, new_y, self.meta)
+
+
+    def resample_x(self, step=None, begin=None, end=None, num_points=None):
         """ resampled x-values at a given increment
 
         Resulting profile has stepsize of the indicated step based on
@@ -622,8 +689,10 @@ class Profile():
 
         Parameters
         ----------
-        step : float
-            sampling increment
+        step : float, optional
+        begin : float, optional
+        end : float, optional
+        num_points : int, optional
 
         Returns
         -------
@@ -631,9 +700,30 @@ class Profile():
 
         """
 
-        new_x = np.arange(self.x[0], self.x[-1], step)
-        new_y = self.interp(new_x)
+        if not begin:
+            begin = min(self.x)
+        if not end:
+            end = max(self.x)
+        if not step:
+            try: 
+                step = (end-begin)/num_points
+            except TypeError:
+                step = np.average(np.diff(self.x))
+
+        new_x = np.arange(begin, end, step)
+        new_y = self.get_y(new_x)
         return Profile(new_x, new_y, self.meta)
+
+        # new_x = np.arange(self.x[0], self.x[-1], step)
+        # new_y = self.interp(new_x)
+        # return Profile(new_x, new_y, self.meta)
+
+
+
+
+
+
+
 
     def resample_y(self, step):
         """ resampled y-values at a given increment

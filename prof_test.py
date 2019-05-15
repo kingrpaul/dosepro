@@ -201,17 +201,34 @@ def test_slice_segment():
     assert np.array_equal(all_points.y, profiler.y)
 
 
-def test_resample_x():
-    profiler = Profile().from_tuples(PROFILER, meta={'depth': 10})
-    assert profiler.meta['depth'] == 10
-    assert np.isclose(profiler.interp(0), profiler.resample_x(0.1).interp(0))
-    assert np.isclose(profiler.interp(6.372),
-                      profiler.resample_x(0.1).interp(6.372))
-    resampled = profiler.resample_x(0.1)
-    increments = np.diff([i for i in resampled.x])
-    assert np.allclose(increments, 0.1)
-    assert np.isclose(resampled.y[0], profiler.y[0])
+# def test_resample_x():
+#     profiler = Profile().from_tuples(PROFILER, meta={'depth': 10})
+#     assert profiler.meta['depth'] == 10
+#     assert np.isclose(profiler.interp(0), profiler.resample_x(0.1).interp(0))
+#     assert np.isclose(profiler.interp(6.372),
+#                       profiler.resample_x(0.1).interp(6.372))
+#     resampled = profiler.resample_x(0.1)
+#     increments = np.diff([i for i in resampled.x])
+#     assert np.allclose(increments, 0.1)
+#     assert np.isclose(resampled.y[0], profiler.y[0])
 
+
+def test_resample_x():
+    profiler = Profile().from_tuples(PROFILER)
+    print(profiler.get_y([0]))  ######
+    # profiler.resample_x(0.1)  ######
+    # profiler.resample_x(0.1).get_y([0.0])  ######
+    # print(profiler.resample_x(0.1))  ######
+
+    # assert np.isclose(profiler.interp(0), profiler.resample_x([0.1]).interp(0))
+    # assert np.isclose(profiler.interp(6.372),
+    #                   profiler.resample_x(0.1).interp(6.372))
+    # resampled = profiler.resample_x(0.1)
+    # increments = np.diff([i for i in resampled.x])
+    # assert np.allclose(increments, 0.1)
+    # assert np.isclose(resampled.y[0], profiler.y[0])
+
+    # assert np.isclose(profiler.resample_x().x[0], -16.4)
 
 def test_resample_y():
     profiler = Profile().from_tuples(PROFILER)
@@ -309,34 +326,34 @@ def test_cross_calibrate():
 
 
 if __name__ == "__main__":
-    test_init()
-    test_interp()
-    test_magic_methods()
-    test_from_lists()
-    test_from_tuples()
-    test_from_pulse()
-    test_from_snc_profiler()
-    test_from_narrow_png()
-    test_from_raystation_line()
-    test_from_rfa_ascii()
-    test_from_pinnacle_ascii() ######
-    test_get_y()
-    test_get_x()
-    test_get_increment()
-    test_slice_segment()
-    test_resample_x()
-    test_resample_y()
-    test_make_normal_y()
-    test_get_edges()
-    test_make_normal_x()
-    test_slice_umbra()
-    test_slice_penumbra()
-    test_slice_shoulders()
-    test_slice_tails()
-    test_get_flatness()
-    test_get_symmetry()
-    test_make_symmetric()
-    test_make_centered()
-    test_make_flipped()
-    test_align_to()
-    test_cross_calibrate()
+    # test_init()
+    # test_interp()
+    # test_magic_methods()
+    # test_from_lists()
+    # test_from_tuples()
+    # test_from_pulse()
+    # test_from_snc_profiler()
+    # test_from_narrow_png()
+    # test_from_raystation_line()
+    # test_from_rfa_ascii()
+    # test_from_pinnacle_ascii()
+    # test_get_y()
+    # test_get_x()
+    # test_get_increment()
+    # test_slice_segment()
+    test_resample_x() ######
+    # test_resample_y()
+    # test_make_normal_y()
+    # test_get_edges()
+    # test_make_normal_x()
+    # test_slice_umbra()
+    # test_slice_penumbra()
+    # test_slice_shoulders()
+    # test_slice_tails()
+    # test_get_flatness()
+    # test_get_symmetry()
+    # test_make_symmetric()
+    # test_make_centered()
+    # test_make_flipped()
+    # test_align_to()
+    # test_cross_calibrate()
