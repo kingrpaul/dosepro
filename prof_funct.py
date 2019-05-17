@@ -48,6 +48,9 @@ from functools import partial
 import PIL
 import csv
 import re
+import time
+import pwlf
+
 
 add_path = os.path.abspath(os.path.join(__file__, '..','..','..','..'))
 add_path = os.path.join(add_path, 'src', 'dosepro', '_labs', 'paulking')
@@ -1016,11 +1019,7 @@ class Profile():
 
         """
 
-        _, ext = os.path.splitext(reference)
-        assert ext == '.prs'
         reference = Profile().from_snc_profiler(reference, 'rad')
-        _, ext = os.path.splitext(measured)
-        assert ext == '.png'
         measured = Profile().from_narrow_png(measured)
         measured = measured.align_to(reference)
 
@@ -1029,10 +1028,51 @@ class Profile():
             min(max(measured.x), max(reference.x)),
             max(reference.get_increment(), measured.get_increment()))
 
-        calib_curve = [(measured.get_y(i), reference.get_y(i))
-                       for i in dist_vals]
+        x = np.array([float(measured.get_y(i)) for i in dist_vals])
+        y = np.array([float(reference.get_y(i)) for i in dist_vals])
 
-        return Profile().from_tuples(calib_curve)
+        seq = np.argsort(x) 
+        x,y = x[seq], y[seq]
+
+        def is_monotonic(func, x, y):
+            return np.all(np.diff(func(x))>=0)
+
+        def linear(x,y):
+            m, b = np.polyfit(x, y, 1)
+            assert m > 0
+            def func(x):
+                return np.multiply(m,x) + b
+            return func
+        
+        def piece_linear(x,y,num_pieces):
+            my_pwlf = pwlf.PiecewiseLinFit(x, y)
+            my_pwlf.fit(num_pieces)
+            if is_monotonic(my_pwlf.predict, x, y):
+                return  my_pwlf.predict
+            else:
+                return None
+
+        start_time = time.clock()
+        last_func = linear(x,y)
+        for num_pieces in range(2,10):
+            if (time.clock() - start_time) > 60:
+                break
+            next_func = piece_linear(x,y,num_pieces)
+            if not next_func:
+                break
+            if next_func:
+                last_func = next_func
+
+        result = last_func
+        # print(time.clock() - start_time)
+
+        # plt.plot(x,y, 'ro')
+        # plt.plot(x,last_func(x))
+        # plt.show()
+
+        return result
+
+
 
 if __name__ == "__main__":
     import prof_gui
