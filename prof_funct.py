@@ -326,6 +326,7 @@ class Profile():
 
         """
         image_file = PIL.Image.open(file_name)
+        print(image_file.mode)
         # assert image_file.mode == 'RGB'
         dpi_horiz, dpi_vert = image_file.info['dpi']
 

@@ -147,7 +147,7 @@ def test_from_snc_profiler():
 
 
 def test_from_narrow_png():
-    file_name = os.path.join(DATA_DIR, '2017_12_04 FilmCalib_EBT_vert_strip.png')
+    file_name = os.path.join(DATA_DIR, 'film', '2017_12_04 FilmCalib_EBT_vert_strip.png')
     png = Profile().from_narrow_png(file_name)
     assert np.isclose(png.get_y(0), 0.609074819347117)
 
@@ -299,11 +299,42 @@ def test_align_to():
 
 
 def test_cross_calibrate():
-    reference_file_name = os.path.join(DATA_DIR, '2017_12_04 FilmCalib.prs')
-    measured_file_name = os.path.join(DATA_DIR, '2017_12_04 FilmCalib_EBT_vert_strip.png')
+    reference_file_name = os.path.join(DATA_DIR, 'film', '2017_12_04 FilmCalib.prs')
+    measured_file_name = os.path.join(DATA_DIR, 'film', '2017_12_04 FilmCalib_EBT_vert_strip.png')
     cal_curve = Profile().cross_calibrate(
         reference_file_name, measured_file_name)
     assert np.allclose(cal_curve([0.3, 0.5, 0.65]), [22, 135, 325], rtol=0.2)
+
+    # reference_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_100MU.prs')
+    # measured_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_100MU.png')
+    # cal_curve = Profile().cross_calibrate(
+    #     reference_file_name, measured_file_name)
+    # reference_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_400MU.prs')
+    # measured_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_400MU.png')
+    # cal_curve = Profile().cross_calibrate(
+    #     reference_file_name, measured_file_name)
+    # reference_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_600MU.prs')
+    # measured_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_600MU.png')
+    # cal_curve = Profile().cross_calibrate(
+    #     reference_file_name, measured_file_name)
+    # reference_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_1000MU.prs')
+    # measured_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_1000MU.png')
+    # cal_curve = Profile().cross_calibrate(
+    #     reference_file_name, measured_file_name)
+
+    # reference_file_name = os.path.join(DATA_DIR, '2019_05_12_ebt_1200.prs')
+    # measured_file_name = os.path.join(DATA_DIR, '2019_05_12_ebt_1200.png')
+    # cal_curve = Profile().cross_calibrate(
+    #     reference_file_name, measured_file_name)
+
+    reference_file_name = os.path.join(DATA_DIR, 'film', '2019_05_19_EBT2_400.prs')
+    measured_file_name = os.path.join(DATA_DIR, 'film', '2019_05_19_EBT2_400.png')
+    cal_curve = Profile().cross_calibrate(
+        reference_file_name, measured_file_name)
+
+
+    ### in order for this to work, the PNG image must be a "negative"
+
 
 if __name__ == "__main__":
     # test_init()
