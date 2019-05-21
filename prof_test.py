@@ -29,6 +29,8 @@ import numpy as np
 import sys
 
 from prof_funct import Profile
+import profile_from
+import cross_calibrate
 
 # pylint: disable = E1102, C0111
 
@@ -87,7 +89,7 @@ def test_interp():
 def test_magic_methods():
     assert not Profile()
     # __len__
-    assert len(Profile().from_tuples(PROFILER)) == 83
+    assert len(profile_from.tuples(PROFILER)) == 83
     # __eq__
     assert Profile() == Profile()
     assert Profile(x=[], y=[]) == Profile()
@@ -99,18 +101,18 @@ def test_magic_methods():
     # __str__
     empty_profile = Profile()
     print(empty_profile)
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert profiler.__str__()
     # __add__, __radd__, __iadd__
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert np.isclose(profiler.get_y(0),
                       (profiler+2).get_y(2))
     # __sub__, __rsub__, __isub__
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert np.isclose(profiler.get_y(0),
                       (profiler-2).get_y(-2))
     # __mul__, __rmul__, __imul__
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert np.isclose(4*sum(profiler.y), sum((4*profiler).y))
     assert np.isclose(4*sum(profiler.y), sum((profiler*4).y))
     ref = 4*sum(profiler.y)
@@ -120,27 +122,25 @@ def test_magic_methods():
 
 def test_from_lists():
     empty = Profile()
-    also_empty = empty
-    also_empty.from_lists([], [])
+    also_empty = profile_from.lists([], [])
     assert empty == also_empty
 
 
-def test_from_tuples():
-    empty = Profile()
-    profiler = empty.from_tuples(PROFILER)
+def test_fromtuples():
+    profiler = profile_from.tuples(PROFILER)
     assert len(profiler.x) == len(PROFILER)
     assert profiler.x[0] == PROFILER[0][0]
 
 
 def test_from_pulse():
-    pulse = 4 * Profile().from_pulse(0.0, 1, (-5, 5), 0.1)
+    pulse = 4 * profile_from.pulse(0.0, 1, (-5, 5), 0.1)
     assert np.isclose(sum(pulse.y), 40)
 
 
 def test_from_snc_profiler():
     file_name = os.path.join(DATA_DIR, '2018_12_03 clinac 10x10 open.prs')
-    x_profile = Profile().from_snc_profiler(file_name, 'tvs')
-    y_profile = Profile().from_snc_profiler(file_name, 'rad')
+    x_profile = profile_from.snc_profiler(file_name, 'tvs')
+    y_profile = profile_from.snc_profiler(file_name, 'rad')
     assert np.isclose(x_profile.get_y(0), 45.50562901780488)
     assert np.isclose(y_profile.get_y(0), 45.50562901780488)
     assert x_profile.meta['SSD'] == y_profile.meta['SSD']
@@ -148,61 +148,61 @@ def test_from_snc_profiler():
 
 def test_from_narrow_png():
     file_name = os.path.join(DATA_DIR, 'film', '2017_12_04 FilmCalib_EBT_vert_strip.png')
-    png = Profile().from_narrow_png(file_name)
+    png = profile_from.narrow_png(file_name)
     assert np.isclose(png.get_y(0), 0.609074819347117)
 
 def test_from_raystation_line():
     file_name = os.path.join(DATA_DIR, '2018_02_08_raystation_line_dose.csv')
-    ray = Profile().from_raystation_line(file_name)
+    ray = profile_from.raystation_line(file_name)
     assert np.isclose(min(ray.x), ray.x[0])
     assert np.isclose(max(ray.x), ray.x[-1])
     assert np.isclose(max(ray.y), 0.41)
 
 def test_from_rfa_ascii():
     file_name = os.path.join(DATA_DIR, '2018_02_01 RFA300 ASCII Measurement.asc')
-    rfa = Profile().from_rfa_ascii(file_name)
+    rfa = profile_from.rfa_ascii(file_name)
     assert len(rfa)==2
     assert np.isclose(rfa[0].x[0], -11.2)
 
 def test_from_pinnacle_ascii():
     file_name = os.path.join(DATA_DIR, '2007_11_20 - Pinnacle ASCII 40x40.dat')
-    pinn = Profile().from_pinnacle_ascii(file_name)
+    pinn = profile_from.pinnacle_ascii(file_name)
     assert type(pinn) == list
     assert len(pinn) == 5
     assert np.isclose(pinn[0].x[0], -24)
 
 def test_get_y():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert np.isclose(profiler.get_y(0), 45.23)
 
 def test_get_x():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert np.allclose(profiler.get_x(10), (-5.17742830712, 5.1740693196))
 
 def test_get_increment():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert np.isclose(profiler.get_increment(), 0.4)
 
 def test_slice_segment():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     # NO POINTS
     no_points = profiler.slice_segment(start=1, stop=0)
     assert np.array_equal(no_points.x, [])
     assert np.array_equal(no_points.y, [])
     # ONE POINT
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     one_point = profiler.slice_segment(start=0, stop=0)
     assert np.array_equal(one_point.x, [0])
     assert np.array_equal(one_point.y, [45.23])
     # ALL POINTS
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     all_points = profiler.slice_segment()
     assert np.array_equal(all_points.x, profiler.x)
     assert np.array_equal(all_points.y, profiler.y)
 
 
 def test_resample_x():
-    profiler = Profile().from_tuples(PROFILER, meta={'depth': 10})
+    profiler = profile_from.tuples(PROFILER, meta={'depth': 10})
     assert profiler.meta['depth'] == 10
     assert np.isclose(profiler.interp(0), profiler.resample_x(0.1).interp(0))
     assert np.isclose(profiler.interp(6.372),
@@ -214,36 +214,36 @@ def test_resample_x():
 
 
 def test_resample_y():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert len(profiler.resample_y(0.5)) > len(profiler.resample_y(1))
 
 
 def test_make_normal_y():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert np.isclose(profiler.make_normal_y(x=0).get_y(0), 1.0)
 
 
 def test_get_edges():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert np.allclose(profiler.get_edges(), (-5.2, 4.8))
     assert len(profiler) == len(PROFILER)
 
 def test_make_normal_x():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert np.isclose(profiler.make_normal_x().x[0], -3.1538461538461533)
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert len(PROFILER) == len(profiler.make_normal_x().x)
 
 
 def test_slice_umbra():
-    profiler = Profile().from_tuples(PROFILER).resample_x(0.1)
+    profiler = profile_from.tuples(PROFILER).resample_x(0.1)
     profiler_length = len(profiler)
     umbra = profiler.slice_umbra()
     assert len(umbra) < profiler_length
 
 
 def test_slice_penumbra():
-    profiler = Profile().from_tuples(PROFILER).resample_x(0.1)
+    profiler = profile_from.tuples(PROFILER).resample_x(0.1)
     lt_penum, rt_penum = profiler.slice_penumbra()
     assert np.all(lt_penum.x < 0)
     assert np.all(rt_penum.x > 0)
@@ -252,119 +252,89 @@ def test_slice_penumbra():
 
 
 def test_slice_shoulders():
-    profiler = Profile().from_tuples(PROFILER).resample_x(0.1)
+    profiler = profile_from.tuples(PROFILER).resample_x(0.1)
     lt_should, rt_should = profiler.slice_shoulders()
     assert np.all(lt_should.x < min(rt_should.x))
     assert np.all(rt_should.x > max(lt_should.x))
 
 
 def test_slice_tails():
-    profiler = Profile().from_tuples(PROFILER).resample_x(0.1)
+    profiler = profile_from.tuples(PROFILER).resample_x(0.1)
     lt_tail, rt_tail = profiler.slice_tails()
     assert np.all(lt_tail.x < min(rt_tail.x))
     assert np.all(rt_tail.x > max(lt_tail.x))
 
 
 def test_get_flatness():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     profiler = profiler.resample_x(0.1)
     assert np.isclose(profiler.get_flatness(), 0.03042644213284108)
 
 
 def test_get_symmetry():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     profiler = profiler.resample_x(0.1)
     symmetry = profiler.get_symmetry()
     assert np.isclose(symmetry, 0.024152376510553037)
 
 
 def test_make_symmetric():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert np.isclose(profiler.make_symmetric().get_symmetry(), 0.0)
 
 
 def test_make_centered():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert np.isclose(np.sum(profiler.make_centered().get_edges()), 0.0)
 
 
 def test_make_flipped():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert np.isclose(profiler.get_y(3), profiler.make_flipped().get_y(-3))
 
 
 def test_align_to():
-    profiler = Profile().from_tuples(PROFILER)
+    profiler = profile_from.tuples(PROFILER)
     assert np.isclose(profiler.align_to(profiler+(2)).x[0], profiler.x[0] + 2)
 
 
 def test_cross_calibrate():
     reference_file_name = os.path.join(DATA_DIR, 'film', '2017_12_04 FilmCalib.prs')
     measured_file_name = os.path.join(DATA_DIR, 'film', '2017_12_04 FilmCalib_EBT_vert_strip.png')
-    cal_curve = Profile().cross_calibrate(
-        reference_file_name, measured_file_name)
+    cal_curve = cross_calibrate.cross_calibrate(reference_file_name, measured_file_name)
     assert np.allclose(cal_curve([0.3, 0.5, 0.65]), [22, 135, 325], rtol=0.2)
-
-    # reference_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_100MU.prs')
-    # measured_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_100MU.png')
-    # cal_curve = Profile().cross_calibrate(
-    #     reference_file_name, measured_file_name)
-    # reference_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_400MU.prs')
-    # measured_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_400MU.png')
-    # cal_curve = Profile().cross_calibrate(
-    #     reference_file_name, measured_file_name)
-    # reference_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_600MU.prs')
-    # measured_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_600MU.png')
-    # cal_curve = Profile().cross_calibrate(
-    #     reference_file_name, measured_file_name)
-    # reference_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_1000MU.prs')
-    # measured_file_name = os.path.join(DATA_DIR, '2019_04_02 EBT2_1000MU.png')
-    # cal_curve = Profile().cross_calibrate(
-    #     reference_file_name, measured_file_name)
-
-    # reference_file_name = os.path.join(DATA_DIR, '2019_05_12_ebt_1200.prs')
-    # measured_file_name = os.path.join(DATA_DIR, '2019_05_12_ebt_1200.png')
-    # cal_curve = Profile().cross_calibrate(
-    #     reference_file_name, measured_file_name)
-
-    reference_file_name = os.path.join(DATA_DIR, 'film', '2019_05_19_EBT2_400.prs')
-    measured_file_name = os.path.join(DATA_DIR, 'film', '2019_05_19_EBT2_400.png')
-    cal_curve = Profile().cross_calibrate(
-        reference_file_name, measured_file_name)
-
-
-    ### in order for this to work, the PNG image must be a "negative"
+    ### in order for this to work, the PNG image must be a "negative if RGB"
 
 
 if __name__ == "__main__":
-    # test_init()
-    # test_interp()
-    # test_magic_methods()
-    # test_from_lists()
-    # test_from_tuples()
-    # test_from_pulse()
-    # test_from_snc_profiler()
-    # test_from_narrow_png()
-    # test_from_raystation_line()
-    # test_from_rfa_ascii()
-    # test_from_pinnacle_ascii()
-    # test_get_y()
-    # test_get_x()
-    # test_get_increment()
-    # test_slice_segment()
-    # test_resample_x()
-    # test_resample_y()
-    # test_make_normal_y()
-    # test_get_edges()
-    # test_make_normal_x()
-    # test_slice_umbra()
-    # test_slice_penumbra()
-    # test_slice_shoulders()
-    # test_slice_tails()
-    # test_get_flatness()
-    # test_get_symmetry()
-    # test_make_symmetric()
-    # test_make_centered()
-    # test_make_flipped()
-    # test_align_to()
+    test_init()
+    test_interp()
+    test_magic_methods()
+    test_from_lists()
+    test_fromtuples()
+    test_from_pulse()
+    test_from_snc_profiler()
+    test_from_narrow_png()
+    test_from_raystation_line()
+    test_from_rfa_ascii()
+    test_from_pinnacle_ascii()
+    test_get_y()
+    test_get_x()
+    test_get_increment()
+    test_slice_segment()
+    test_resample_x()
+    test_resample_y()
+    test_make_normal_y()
+    test_get_edges()
+    test_make_normal_x()
+    test_slice_umbra()
+    test_slice_penumbra()
+    test_slice_shoulders()
+    test_slice_tails()
+    test_get_flatness()
+    test_get_symmetry()
+    test_make_symmetric()
+    test_make_centered()
+    test_make_flipped()
+    test_align_to()
     test_cross_calibrate()
