@@ -51,7 +51,7 @@ import re
 import time
 import pwlf
 
-from prof_funct import Profile
+from profile_class import Profile
 
 # pylint: disable = C0103, C0121, W0102
 
@@ -133,7 +133,7 @@ def pulse(centre, width, domain, increment, meta={}):
     return lists(x_vals, y, meta=meta)
 
 def snc_profiler(file_name, axis):
-    """ import profile form SNC Profiler file
+    """ import profile from SNC Profiler file
 
     Parameters
     ----------

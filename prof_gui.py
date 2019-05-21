@@ -47,7 +47,7 @@ from matplotlib.figure import Figure
 from functools import partial
 import PIL
 
-from prof_funct import Profile
+from profile_class import Profile
 
 # pylint: disable = C0103, C0121, W0102
 

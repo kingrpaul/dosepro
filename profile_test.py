@@ -25,12 +25,13 @@
 """ Test profile. """
 
 import os
-import numpy as np
 import sys
 
-from profile_class import Profile
-import profile_from
+import numpy as np
+
 import cross_calibrate
+import profile_from
+from profile_class import Profile
 
 # pylint: disable = E1102, C0111
 
@@ -144,6 +145,12 @@ def test_from_snc_profiler():
     assert np.isclose(x_profile.get_y(0), 45.50562901780488)
     assert np.isclose(y_profile.get_y(0), 45.50562901780488)
     assert x_profile.meta['SSD'] == y_profile.meta['SSD']
+
+    ########  STARTING TO TEST THE FILE WRITER HERE
+    import profile_to
+    # print(x_profile.meta)
+    profile_to.snc_profiler(x_profile, y_profile, 'delete_me.prs', meta=x_profile.meta)
+
 
 
 def test_from_narrow_png():
@@ -337,4 +344,4 @@ if __name__ == "__main__":
     test_make_centered()
     test_make_flipped()
     test_align_to()
-    test_cross_calibrate()
+    # test_cross_calibrate()   ## slow
